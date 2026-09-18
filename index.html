@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PapaParse CDN (CSV 파싱 라이브러리) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <!-- Noto Sans 폰트 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +30,7 @@
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">일본 인플루언서 프로필</h1>
       </div>
       <div class="text-right">
-        <div class="text-xs sm:text-sm text-slate-400 font-medium">업데이트: 2026.09.18 기준</div>
+        <div id="update-date" class="text-xs sm:text-sm text-slate-400 font-medium">업데이트 확인 중...</div>
         <div class="text-xs sm:text-sm text-slate-600 font-semibold mt-0.5">등록 크리에이터: <span id="total-count" class="font-bold text-rose-600">0</span>명</div>
       </div>
     </div>
@@ -36,166 +38,84 @@
 
   <!-- Creator Grid -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div id="loading" class="text-center py-20 text-slate-400 font-medium">
+      데이터를 불러오는 중입니다...
+    </div>
     <div id="creator-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
       <!-- JavaScript로 카드 렌더링 -->
     </div>
   </main>
 
   <script>
-    const CREATORS = [
-      {
-        no: 1,
-        name: "たかしグルメ【福岡グルメ】",
-        genre: "음식",
-        gender: "남",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "69K", medianViews: "56K", er: "1.0%" },
-        tiktok: { link: "https://www.tiktok.com", followers: "93.3K", medianViews: "38K", er: "2.5%" },
-        youtube: { link: "https://www.youtube.com", followers: "6.59K", medianViews: "6.2K" }
-      },
-      {
-        no: 2,
-        name: "りり 🧋 元CAのグルメ旅",
-        genre: "음식, 여행",
-        gender: "여",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "158K", medianViews: "130K", er: "3.5%" },
-        tiktok: { link: "https://www.tiktok.com", followers: "146.2K", medianViews: "60K", er: "6.2%" },
-        youtube: { link: "https://www.youtube.com", followers: "106K", medianViews: "125K" }
-      },
-      {
-        no: 3,
-        name: "まさきグルメ【福岡グルメ】",
-        genre: "음식",
-        gender: "",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "214K", medianViews: "271K", er: "0.8%" },
-        tiktok: { link: "https://www.tiktok.com", followers: "191.5K", medianViews: "27K", er: "3.3%" },
-        youtube: { link: "https://www.youtube.com", followers: "144K", medianViews: "26.5K" }
-      },
-      {
-        no: 4,
-        name: "あまと【福岡グルメ/福岡おでかけ/九州・海外旅行】",
-        genre: "음식, 여행",
-        gender: "",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "197K", medianViews: "115K", er: "0.5%" },
-        tiktok: { link: "https://www.tiktok.com", followers: "27.7K", medianViews: "6.7K", er: "2.2%" },
-        youtube: { link: "https://www.youtube.com", followers: "50.1K", medianViews: "7.3K" }
-      },
-      {
-        no: 5,
-        name: "かいせいの九州旅",
-        genre: "음식, 여행",
-        gender: "",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "317K", medianViews: "197K", er: "0.6%" },
-        tiktok: { link: "https://www.tiktok.com", followers: "920.4K", medianViews: "123K", er: "2.6%" },
-        youtube: { link: "https://www.youtube.com", followers: "172K", medianViews: "24K" }
-      },
-      {
-        no: 6,
-        name: "りょうま【佐賀グルメおでかけ】",
-        genre: "음식, 여행",
-        gender: "",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "68K", medianViews: "71K", er: "1.0%" },
-        tiktok: { link: "https://www.tiktok.com", followers: "30.8K", medianViews: "19K", er: "2.2%" },
-        youtube: { link: "https://www.youtube.com", followers: "14.4K", medianViews: "14.4K" }
-      },
-      {
-        no: 7,
-        name: "TAKUMI【福岡・熊本グルメ】",
-        genre: "음식",
-        gender: "",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "79K", medianViews: "31K", er: "1.0%" },
-        tiktok: { link: "https://www.tiktok.com", followers: "35.1K", medianViews: "8.2K", er: "2.7%" },
-        youtube: { link: "https://www.youtube.com", followers: "11.9K", medianViews: "6.55K" }
-      },
-      {
-        no: 8,
-        name: "ゆうデート|福岡大人グルメ・旅行",
-        genre: "음식, 여행",
-        gender: "",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "147K", medianViews: "96K", er: "0.6%" },
-        tiktok: { link: "https://www.tiktok.com", followers: "25.2K", medianViews: "19K", er: "3.2%" },
-        youtube: null
-      },
-      {
-        no: 9,
-        name: "ふくまる旅|福岡・九州おでかけカップル",
-        genre: "음식, 여행",
-        gender: "",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "2인 1조(커플)",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "117K", medianViews: "81K", er: "-" },
-        tiktok: { link: "https://www.tiktok.com", followers: "40.8K", medianViews: "33K", er: "2.0%" },
-        youtube: { link: "https://www.youtube.com", followers: "170K", medianViews: "27.5K" }
-      },
-      {
-        no: 10,
-        name: "ソロ【休日一人旅】",
-        genre: "음식, 여행",
-        gender: "남",
-        followerGender: "",
-        followerAge: "",
-        followerCountry: "",
-        shootType: "단독",
-        koreanLevel: "",
-        multiChannel: true,
-        insta: { link: "https://www.instagram.com", followers: "77K", medianViews: "323K", er: "0.9%" },
-        tiktok: { link: "https://www.tiktok.com", followers: "16.7K", medianViews: "11K", er: "1.2%" },
-        youtube: { link: "https://www.youtube.com", followers: "37.2K", medianViews: "9.35K" }
+    // ★ Step 2에서 복사한 공개용 탭의 CSV 주소를 여기에 넣으세요 ★
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pub?gid=588148010&single=true&output=csv";
+
+    async function loadSheetData() {
+      try {
+        const response = await fetch(GOOGLE_SHEET_CSV_URL);
+        const csvText = await response.text();
+
+        Papa.parse(csvText, {
+          header: false,
+          skipEmptyLines: true,
+          complete: function(results) {
+            const rows = results.data;
+            if (rows.length < 3) return;
+
+            // 1행에서 업데이트 날짜 추출 (A1 셀)
+            const firstCell = rows[0][0] || "";
+            const dateMatch = firstCell.match(/\d{4}[.-]\d{2}[.-]\d{2}/);
+            if (dateMatch) {
+              document.getElementById('update-date').innerText = `업데이트: ${dateMatch[0]} 기준`;
+            } else {
+              document.getElementById('update-date').innerText = `실시간 연동 중`;
+            }
+
+            // 3행부터 실제 크리에이터 데이터 (헤더 행 제외)
+            const creators = [];
+            for (let i = 2; i < rows.length; i++) {
+              const r = rows[i];
+              if (!r[0] || isNaN(r[0])) continue; // NO 번호가 없으면 제외
+
+              creators.push({
+                no: r[0],               // A: NO
+                nameEn: r[1] || "",     // B: 이름 (영어)
+                accountName: r[2],      // C: 계정명
+                genre: r[3] || "",      // D: 콘텐츠 장르
+                gender: r[4] || "",     // E: 성별
+                shootType: r[8] || "",  // I: 촬영 형태
+                koreanLevel: r[9] || "",// J: 한국어 소통
+                insta: {
+                  link: r[11] || "#",
+                  followers: r[12] || "-",
+                  medianViews: r[14] || "-",
+                  er: r[15] || "-"
+                },
+                tiktok: {
+                  link: r[16] || "",
+                  followers: r[17] || "-",
+                  medianViews: r[19] || "-",
+                  er: r[20] || "-"
+                },
+                youtube: {
+                  link: r[21] || "",
+                  followers: r[22] || "-",
+                  medianViews: r[23] || "-"
+                }
+              });
+            }
+
+            renderCards(creators);
+          }
+        });
+      } catch (err) {
+        document.getElementById('loading').innerText = "데이터를 불러오는 중 오류가 발생했습니다. CSV URL을 확인해 주세요.";
+        console.error(err);
       }
-    ];
+    }
 
     function renderCards(data) {
+      document.getElementById('loading').style.display = 'none';
       const grid = document.getElementById('creator-grid');
       const countEl = document.getElementById('total-count');
       grid.innerHTML = '';
@@ -206,7 +126,7 @@
         card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col justify-between";
 
         const tags = [];
-        tags.push(`<span class="bg-slate-100 text-slate-700 text-xs sm:text-sm px-3 py-1 rounded-md font-semibold">${c.genre}</span>`);
+        if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-xs sm:text-sm px-3 py-1 rounded-md font-semibold">${c.genre}</span>`);
         if (c.gender) tags.push(`<span class="bg-blue-50 text-blue-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.gender}</span>`);
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.shootType}</span>`);
         if (c.koreanLevel) tags.push(`<span class="bg-amber-50 text-amber-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.koreanLevel}</span>`);
@@ -214,55 +134,56 @@
         card.innerHTML = `
           <div class="p-6">
             <!-- Header -->
-            <div class="flex items-center justify-between gap-2 mb-4">
+            <div class="flex items-center justify-between gap-2 mb-3">
               <span class="text-sm font-bold text-slate-400">NO.${c.no}</span>
               <div class="flex flex-wrap gap-1.5 justify-end">
                 ${tags.join('')}
               </div>
             </div>
             
-            <!-- Creator Name -->
-            <h3 class="text-lg sm:text-xl font-bold text-slate-900 leading-snug line-clamp-2 mb-5 hover:text-rose-600 transition">
-              <a href="${c.insta.link}" target="_blank" rel="noopener">${c.name}</a>
-            </h3>
+            <!-- Creator Names -->
+            <div class="mb-5">
+              ${c.nameEn ? `<div class="text-xs font-semibold text-rose-600 tracking-wide uppercase mb-0.5">${c.nameEn}</div>` : ''}
+              <h3 class="text-lg sm:text-xl font-bold text-slate-900 leading-snug line-clamp-2 select-none">
+                ${c.accountName}
+              </h3>
+            </div>
 
             <!-- Main Metric: Instagram -->
             <div class="bg-gradient-to-br from-rose-50 to-orange-50 border border-rose-100 rounded-2xl p-4 mb-5">
               <div class="flex items-center justify-between text-xs sm:text-sm font-bold text-rose-600 mb-3">
                 <span class="flex items-center gap-1.5"><i data-lucide="instagram" class="w-4 h-4"></i> Instagram (메인)</span>
-                <a href="${c.insta.link}" target="_blank" class="hover:underline flex items-center">프로필 <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i></a>
+                ${c.insta.link && c.insta.link !== '#' ? `<a href="${c.insta.link}" target="_blank" rel="noopener" class="hover:underline flex items-center">SNS 바로가기 <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i></a>` : ''}
               </div>
-              <div class="grid grid-cols-3 gap-2.5 text-center">
+              <div class="grid grid-cols-3 gap-2 text-center">
                 <div class="bg-white/90 rounded-xl p-2.5 shadow-sm">
                   <div class="text-xs text-slate-500 mb-0.5">팔로워</div>
-                  <div class="text-base sm:text-lg font-bold text-slate-800">${c.insta.followers}</div>
+                  <div class="text-sm sm:text-base font-bold text-slate-800">${c.insta.followers}</div>
                 </div>
                 <div class="bg-white/90 rounded-xl p-2.5 ring-2 ring-rose-300 shadow-sm">
                   <div class="text-xs text-rose-600 font-semibold mb-0.5">조회수 중앙값</div>
-                  <div class="text-base sm:text-lg font-extrabold text-rose-600">${c.insta.medianViews}</div>
+                  <div class="text-sm sm:text-base font-extrabold text-rose-600">${c.insta.medianViews}</div>
                 </div>
                 <div class="bg-white/90 rounded-xl p-2.5 shadow-sm">
                   <div class="text-xs text-slate-500 mb-0.5">ER(참여율)</div>
-                  <div class="text-base sm:text-lg font-bold text-slate-800">${c.insta.er}</div>
+                  <div class="text-sm sm:text-base font-bold text-slate-800">${c.insta.er}</div>
                 </div>
               </div>
             </div>
 
             <!-- Sub Channels (TikTok / YouTube) -->
             <div class="space-y-2.5 text-xs sm:text-sm">
-              <!-- TikTok -->
               <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span class="font-semibold text-slate-700 flex items-center gap-2">
                   <span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span> TikTok
                 </span>
-                <span class="text-slate-600">팔로워 <b class="text-slate-900">${c.tiktok ? c.tiktok.followers : '-'}</b> / 중앙 <b class="text-slate-900">${c.tiktok ? c.tiktok.medianViews : '-'}</b></span>
+                <span class="text-slate-600">팔로워 <b class="text-slate-900">${c.tiktok.followers}</b> / 조회수 중앙값 <b class="text-slate-900">${c.tiktok.medianViews}</b></span>
               </div>
-              <!-- YouTube -->
               <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span class="font-semibold text-slate-700 flex items-center gap-2">
                   <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> YouTube
                 </span>
-                <span class="text-slate-600">구독자 <b class="text-slate-900">${c.youtube ? c.youtube.followers : '-'}</b> / 중앙 <b class="text-slate-900">${c.youtube ? c.youtube.medianViews : '-'}</b></span>
+                <span class="text-slate-600">구독자 <b class="text-slate-900">${c.youtube.followers}</b> / 조회수 중앙값 <b class="text-slate-900">${c.youtube.medianViews}</b></span>
               </div>
             </div>
           </div>
@@ -280,7 +201,8 @@
       lucide.createIcons();
     }
 
-    renderCards(CREATORS);
+    // 데이터 로드 시작
+    loadSheetData();
   </script>
 </body>
 </html>
