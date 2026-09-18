@@ -13,7 +13,7 @@
   <!-- Noto Sans 폰트 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Noto Sans KR', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -24,15 +24,16 @@
 <body class="bg-[#F8FAFC] text-slate-900 antialiased min-h-screen">
 
   <!-- Header -->
-  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30">
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
       <div class="flex items-center space-x-3.5">
         <span class="bg-slate-900 text-white text-[11px] font-bold px-3 py-1.5 rounded-full tracking-wider">JAPAN CREATOR</span>
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">일본 인플루언서 프로필</h1>
       </div>
-      <div class="text-right">
+      <!-- 우측 상단: 업데이트(년/월) 바로 아래 등록 크리에이터 -->
+      <div class="text-right flex flex-col justify-center">
         <div id="update-date" class="text-xs text-slate-400 font-medium"></div>
-        <div class="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">등록 크리에이터 <span id="total-count" class="font-bold text-slate-900">0</span>명</div>
+        <div class="text-xs sm:text-sm text-slate-600 font-medium">등록 크리에이터 <span id="total-count" class="font-bold text-slate-900">0</span>명</div>
       </div>
     </div>
   </header>
@@ -63,12 +64,12 @@
             const rows = results.data;
             if (rows.length < 3) return;
 
-            // 1행에서 업데이트 날짜 추출
+            // 1행에서 업데이트 날짜 추출 -> 년.월 까지만 표시
             const firstCell = rows[0][0] || "";
-            const dateMatch = firstCell.match(/\d{4}[.-]\d{2}[.-]\d{2}/);
+            const dateMatch = firstCell.match(/(\d{4})[.-](\d{2})/);
             const dateEl = document.getElementById('update-date');
             if (dateMatch) {
-              dateEl.innerText = `업데이트: ${dateMatch[0]} 기준`;
+              dateEl.innerText = `${dateMatch[1]}.${dateMatch[2]} 기준`;
             } else {
               dateEl.innerText = '';
             }
@@ -87,6 +88,7 @@
                 gender: r[4] || "",     // E: 성별
                 shootType: r[8] || "",  // I: 촬영 형태
                 koreanLevel: r[9] || "",// J: 한국어 소통
+                multiChannel: r[10] || "", // K: 멀티 채널 보유 여부
                 insta: {
                   link: r[11] || "",
                   followers: r[12] || "-",
@@ -95,13 +97,11 @@
                 },
                 tiktok: {
                   link: r[16] || "",
-                  followers: r[17] || "",
-                  medianViews: r[19] || ""
+                  followers: r[17] || ""
                 },
                 youtube: {
                   link: r[21] || "",
-                  followers: r[22] || "",
-                  medianViews: r[23] || ""
+                  followers: r[22] || ""
                 }
               });
             }
@@ -126,7 +126,7 @@
 
       data.forEach(c => {
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden";
+        card.className = "bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden";
 
         // 태그 빌드: 성별이 항상 맨 앞
         const tags = [];
@@ -140,42 +140,21 @@
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.shootType}</span>`);
         if (c.koreanLevel) tags.push(`<span class="bg-amber-50 text-amber-700 border border-amber-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.koreanLevel}</span>`);
 
-        // 서브채널 (TikTok / YouTube) 정돈된 룩
-        let subChannelsHtml = '';
-        const hasTiktok = c.tiktok.followers && c.tiktok.followers !== '-' && c.tiktok.followers.trim() !== '';
-        const hasYoutube = c.youtube.followers && c.youtube.followers !== '-' && c.youtube.followers.trim() !== '';
+        // 멀티 채널 보유 여부 뱃지 빌드 (숫자 대신 깔끔하게 태그로만 노출)
+        const hasTiktok = (c.tiktok.link && c.tiktok.link.startsWith('http')) || (c.tiktok.followers && c.tiktok.followers !== '-');
+        const hasYoutube = (c.youtube.link && c.youtube.link.startsWith('http')) || (c.youtube.followers && c.youtube.followers !== '-');
 
+        let multiChannelHtml = '';
         if (hasTiktok || hasYoutube) {
-          subChannelsHtml += '<div class="space-y-2 mt-4 pt-4 border-t border-slate-100">';
-          if (hasTiktok) {
-            subChannelsHtml += `
-              <div class="grid grid-cols-[70px_1fr_1.1fr] items-center px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] sm:text-xs">
-                <span class="font-semibold text-slate-900 flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-slate-900"></span> TikTok
-                </span>
-                <div class="text-slate-500 pr-2 border-r border-slate-200 truncate">
-                  팔로워 <b class="text-slate-800 font-semibold">${c.tiktok.followers}</b>
-                </div>
-                <div class="text-slate-500 pl-3 truncate">
-                  조회수 중앙값 <b class="text-slate-800 font-semibold">${c.tiktok.medianViews || '-'}</b>
-                </div>
-              </div>`;
-          }
-          if (hasYoutube) {
-            subChannelsHtml += `
-              <div class="grid grid-cols-[70px_1fr_1.1fr] items-center px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] sm:text-xs">
-                <span class="font-semibold text-rose-600 flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span> YouTube
-                </span>
-                <div class="text-slate-500 pr-2 border-r border-slate-200 truncate">
-                  구독자 <b class="text-slate-800 font-semibold">${c.youtube.followers}</b>
-                </div>
-                <div class="text-slate-500 pl-3 truncate">
-                  조회수 중앙값 <b class="text-slate-800 font-semibold">${c.youtube.medianViews || '-'}</b>
-                </div>
-              </div>`;
-          }
-          subChannelsHtml += '</div>';
+          multiChannelHtml = `
+            <div class="flex items-center justify-between pt-3 mt-4 border-t border-slate-100 text-xs text-slate-500">
+              <span class="font-medium text-slate-400">멀티 채널 보유</span>
+              <div class="flex items-center gap-1.5">
+                ${hasTiktok ? '<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 text-[11px] font-semibold border border-slate-200">TikTok</span>' : ''}
+                ${hasYoutube ? '<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-red-50 text-red-600 text-[11px] font-semibold border border-red-100">YouTube</span>' : ''}
+              </div>
+            </div>
+          `;
         }
 
         card.innerHTML = `
@@ -189,25 +168,20 @@
             </div>
             
             <!-- Creator Profile Title & Name -->
-            <div class="mb-5 min-h-[58px] flex flex-col justify-end">
-              ${c.nameEn ? `<div class="text-[11px] font-bold text-slate-400 tracking-widest uppercase mb-1">${c.nameEn}</div>` : ''}
-              <h3 class="text-lg font-bold text-slate-900 leading-snug line-clamp-2 select-none">
+            <div class="mb-5 min-h-[54px] flex flex-col justify-end">
+              ${c.nameEn ? `<div class="text-sm font-extrabold text-slate-800 tracking-wider uppercase mb-0.5">${c.nameEn}</div>` : ''}
+              <h3 class="text-base font-semibold text-slate-900 leading-snug line-clamp-2 select-none">
                 ${c.accountName}
               </h3>
             </div>
 
             <!-- Main Metric: Instagram -->
-            <div class="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
-              <!-- Perfect Aligned Instagram Header -->
-              <div class="flex items-center justify-between h-6 mb-3.5">
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white">
-                    <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
-                  </span>
-                  <span class="text-xs font-bold text-slate-800 tracking-tight leading-none">Instagram</span>
-                </div>
+            <div class="rounded-xl border border-slate-200/90 bg-slate-50/60 p-4">
+              <!-- 깔끔하게 정렬된 Instagram 헤더 (마크 제거) -->
+              <div class="flex items-center justify-between mb-3.5">
+                <span class="text-xs font-bold text-slate-900 tracking-tight">Instagram</span>
                 ${c.insta.link && c.insta.link.startsWith('http') ? `
-                  <a href="${c.insta.link}" target="_blank" rel="noopener" class="text-xs font-medium text-slate-500 hover:text-slate-900 flex items-center transition-colors leading-none">
+                  <a href="${c.insta.link}" target="_blank" rel="noopener" class="text-xs font-medium text-slate-500 hover:text-slate-900 flex items-center transition-colors">
                     SNS 바로가기 <i data-lucide="external-link" class="w-3 h-3 ml-1"></i>
                   </a>
                 ` : ''}
@@ -215,28 +189,27 @@
 
               <!-- Metrics 3-Columns -->
               <div class="grid grid-cols-3 gap-2 text-center">
-                <div class="bg-white rounded-lg py-2.5 px-1 border border-slate-200/60 shadow-xs">
+                <div class="bg-white rounded-lg py-2.5 px-1 border border-slate-200/70 shadow-2xs">
                   <div class="text-[10px] text-slate-400 font-medium mb-0.5">팔로워</div>
                   <div class="text-sm sm:text-base font-bold text-slate-800 tracking-tight">${c.insta.followers}</div>
                 </div>
-                <div class="bg-white rounded-lg py-2.5 px-1 border-2 border-slate-900 shadow-xs">
+                <div class="bg-white rounded-lg py-2.5 px-1 border-2 border-slate-900 shadow-2xs">
                   <div class="text-[10px] text-slate-900 font-bold mb-0.5">조회수 중앙값</div>
                   <div class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">${c.insta.medianViews}</div>
                 </div>
-                <div class="bg-white rounded-lg py-2.5 px-1 border border-slate-200/60 shadow-xs">
+                <div class="bg-white rounded-lg py-2.5 px-1 border border-slate-200/70 shadow-2xs">
                   <div class="text-[10px] text-slate-400 font-medium mb-0.5">ER(참여율)</div>
                   <div class="text-sm sm:text-base font-bold text-slate-800 tracking-tight">${c.insta.er}</div>
                 </div>
               </div>
             </div>
 
-            <!-- Sub Channels (TikTok / YouTube) -->
-            ${subChannelsHtml}
+            <!-- 멀티 채널 태그 표시 -->
+            ${multiChannelHtml}
           </div>
 
-          <!-- Card Footer -->
-          <div class="px-6 py-3.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-            <span>방한 스케줄 조율 가능</span>
+          <!-- Card Footer (우측 매니저 배속 단독 배치) -->
+          <div class="px-6 py-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-end text-xs">
             <span class="font-medium text-slate-600">전담 통역 매니저 배속</span>
           </div>
         `;
