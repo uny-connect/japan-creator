@@ -37,19 +37,20 @@
       </div>
     </div>
   </header>
-  <!-- Service Guarantee Banner -->
-<div class="bg-white border-b border-slate-200/60 py-3">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
-    <div class="flex items-center gap-2 text-slate-700 font-medium">
-      <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 font-bold">✓</span>
-      <span>전 라인업 <strong>현장 통역 & 전담 디렉터 매니저 동행</strong> 기본 지원</span>
-    </div>
-    <div class="text-slate-400 text-xs hidden sm:block">
-      ※ 원활한 브랜드 촬영 및 현장 커뮤니케이션을 100% 케어합니다.
+
+  <!-- Service Guarantee Notice Bar (공통 보증 안내 배너) -->
+  <div class="bg-white border-b border-slate-200/80 py-3">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
+      <div class="flex items-center gap-2 text-slate-800 font-medium">
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-900 text-white text-[10px] font-bold">✓</span>
+        <span>전 라인업 <strong>현장 통역 &amp; 전담 디렉터 매니저 동행 케어</strong> 기본 지원</span>
+      </div>
+      <div class="text-slate-400 text-xs hidden sm:block">
+        현장 커뮤니케이션 및 브랜드 가이드 촬영을 100% 밀착 서포트합니다.
+      </div>
     </div>
   </div>
-</div>
-  
+
   <!-- Creator Grid -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
     <div id="loading" class="flex flex-col items-center justify-center py-28 text-slate-400 gap-3">
@@ -100,7 +101,6 @@
               return headers.findIndex(h => keywords.some(k => h.includes(k.toLowerCase())));
             };
 
-            // 플랫폼별 컬럼 위치 정확히 산출
             const idxNo = 0;
             const idxNameEn = 1;
             const idxAccount = 2;
@@ -110,9 +110,9 @@
 
             // 인스타그램 구간
             const idxInstaLink = findIdx(['instagram링크', '인스타그램링크', 'instagram']);
-            const idxInstaFollower = idxInstaLink + 1;
-            const idxInstaMedian = idxInstaLink + 3; // 조회수 중앙값
-            const idxInstaER = idxInstaLink + 4;     // ER
+            const idxInstaFollower = idxInstaLink !== -1 ? idxInstaLink + 1 : -1;
+            const idxInstaMedian = idxInstaLink !== -1 ? idxInstaLink + 3 : -1;
+            const idxInstaER = idxInstaLink !== -1 ? idxInstaLink + 4 : -1;
 
             // 틱톡 구간
             const idxTiktokLink = findIdx(['tiktok링크', '틱톡링크', 'tiktok']);
@@ -172,7 +172,7 @@
 
       data.forEach(c => {
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden";
+        card.className = "bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden p-6";
 
         // 태그 빌드: 성별이 항상 맨 앞
         const tags = [];
@@ -185,7 +185,7 @@
         if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded font-medium">${c.genre}</span>`);
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.shootType}</span>`);
 
-        // 멀티 채널 뱃지 빌드 (링크 유무 및 팔로워 기준 자동 판별)
+        // 멀티 채널 뱃지 빌드 (링크 유무 및 수치 기준 자동 판별)
         const hasTiktok = (c.tiktok.link && c.tiktok.link.startsWith('http')) || (c.tiktok.followers && c.tiktok.followers !== '-' && c.tiktok.followers.trim() !== '');
         const hasYoutube = (c.youtube.link && c.youtube.link.startsWith('http')) || (c.youtube.followers && c.youtube.followers !== '-' && c.youtube.followers.trim() !== '');
 
@@ -206,7 +206,7 @@
         const formattedNo = `#${String(c.no).padStart(2, '0')}`;
 
         card.innerHTML = `
-          <div class="p-6">
+          <div>
             <!-- Header (Index Badge & Tags) -->
             <div class="flex items-center justify-between gap-2 mb-4">
               <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/60 text-[11px] font-bold text-slate-500 tracking-wider">
@@ -256,7 +256,6 @@
             <!-- 멀티 채널 태그 표시 -->
             ${multiChannelHtml}
           </div>
-
         `;
 
         grid.appendChild(card);
