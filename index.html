@@ -3,53 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>일본 크리에이터 라인업 | MCN 파트너십</title>
+  <title>일본 인플루언서 프로필</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Noto Sans 폰트 로드 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap');
-    body { font-family: 'Pretendard', sans-serif; }
+    body {
+      font-family: 'Noto Sans KR', 'Noto Sans JP', sans-serif;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
 
   <!-- Header -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <span class="bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded">Exclusive</span>
-        <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900">일본 인플루언서 방한 취재 라인업</h1>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <span class="bg-rose-600 text-white text-xs sm:text-sm font-bold px-3 py-1.5 rounded-md tracking-wider">JAPAN CREATOR</span>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">일본 인플루언서 프로필</h1>
       </div>
-      <div class="text-xs sm:text-sm text-slate-500 font-medium">
-        업데이트: 2026.09.18 기준
+      <div class="text-right">
+        <div class="text-xs sm:text-sm text-slate-400 font-medium">업데이트: 2026.09.18 기준</div>
+        <div class="text-xs sm:text-sm text-slate-600 font-semibold mt-0.5">등록 크리에이터: <span id="total-count" class="font-bold text-rose-600">0</span>명</div>
       </div>
     </div>
   </header>
 
-  <!-- Filter / Control Bar -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-      <div class="flex items-center gap-2 w-full sm:w-auto">
-        <span class="text-sm font-semibold text-slate-600">카테고리:</span>
-        <button onclick="filterGenre('ALL')" class="genre-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition">전체</button>
-        <button onclick="filterGenre('음식')" class="genre-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">음식</button>
-        <button onclick="filterGenre('여행')" class="genre-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">음식·여행</button>
-      </div>
-      <div class="text-xs text-slate-500 w-full sm:w-auto text-right">
-        등록 크리에이터: <span id="total-count" class="font-bold text-slate-900">0</span>명
-      </div>
+  <!-- Creator Grid -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div id="creator-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+      <!-- JavaScript로 카드 렌더링 -->
     </div>
-
-    <!-- Creator Grid -->
-    <div id="creator-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-      <!-- JS로 카드가 동적 렌더링됩니다 -->
-    </div>
-  </div>
+  </main>
 
   <script>
-    // 시트의 원본 데이터를 JSON 형태로 반영 (D~I 항목 비어있는 상태 대응)
     const CREATORS = [
       {
         no: 1,
@@ -213,71 +205,70 @@
         const card = document.createElement('div');
         card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col justify-between";
 
-        // 태그 빌드
         const tags = [];
-        tags.push(`<span class="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md font-semibold">${c.genre}</span>`);
-        if (c.gender) tags.push(`<span class="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-md font-medium">${c.gender}</span>`);
-        if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 text-xs px-2 py-1 rounded-md font-medium">${c.shootType}</span>`);
-        if (c.koreanLevel) tags.push(`<span class="bg-amber-50 text-amber-700 text-xs px-2 py-1 rounded-md font-medium">${c.koreanLevel}</span>`);
+        tags.push(`<span class="bg-slate-100 text-slate-700 text-xs sm:text-sm px-3 py-1 rounded-md font-semibold">${c.genre}</span>`);
+        if (c.gender) tags.push(`<span class="bg-blue-50 text-blue-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.gender}</span>`);
+        if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.shootType}</span>`);
+        if (c.koreanLevel) tags.push(`<span class="bg-amber-50 text-amber-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.koreanLevel}</span>`);
 
         card.innerHTML = `
           <div class="p-6">
             <!-- Header -->
-            <div class="flex items-start justify-between gap-2 mb-3">
-              <span class="text-xs font-bold text-slate-400">NO.${c.no}</span>
-              <div class="flex flex-wrap gap-1 justify-end">
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <span class="text-sm font-bold text-slate-400">NO.${c.no}</span>
+              <div class="flex flex-wrap gap-1.5 justify-end">
                 ${tags.join('')}
               </div>
             </div>
             
             <!-- Creator Name -->
-            <h3 class="text-base font-bold text-slate-900 line-clamp-2 mb-4 hover:text-rose-600 transition">
+            <h3 class="text-lg sm:text-xl font-bold text-slate-900 leading-snug line-clamp-2 mb-5 hover:text-rose-600 transition">
               <a href="${c.insta.link}" target="_blank" rel="noopener">${c.name}</a>
             </h3>
 
             <!-- Main Metric: Instagram -->
-            <div class="bg-gradient-to-br from-rose-50 to-orange-50 border border-rose-100 rounded-xl p-3.5 mb-4">
-              <div class="flex items-center justify-between text-xs font-bold text-rose-600 mb-2">
-                <span class="flex items-center gap-1"><i data-lucide="instagram" class="w-3.5 h-3.5"></i> Instagram (메인)</span>
-                <a href="${c.insta.link}" target="_blank" class="hover:underline flex items-center">프로필 <i data-lucide="external-link" class="w-3 h-3 ml-0.5"></i></a>
+            <div class="bg-gradient-to-br from-rose-50 to-orange-50 border border-rose-100 rounded-2xl p-4 mb-5">
+              <div class="flex items-center justify-between text-xs sm:text-sm font-bold text-rose-600 mb-3">
+                <span class="flex items-center gap-1.5"><i data-lucide="instagram" class="w-4 h-4"></i> Instagram (메인)</span>
+                <a href="${c.insta.link}" target="_blank" class="hover:underline flex items-center">프로필 <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i></a>
               </div>
-              <div class="grid grid-cols-3 gap-2 text-center">
-                <div class="bg-white/80 rounded-lg p-2">
-                  <div class="text-[10px] text-slate-500">팔로워</div>
-                  <div class="text-sm font-bold text-slate-800">${c.insta.followers}</div>
+              <div class="grid grid-cols-3 gap-2.5 text-center">
+                <div class="bg-white/90 rounded-xl p-2.5 shadow-sm">
+                  <div class="text-xs text-slate-500 mb-0.5">팔로워</div>
+                  <div class="text-base sm:text-lg font-bold text-slate-800">${c.insta.followers}</div>
                 </div>
-                <div class="bg-white/80 rounded-lg p-2 ring-1 ring-rose-200">
-                  <div class="text-[10px] text-rose-500 font-semibold">조회수 중앙값</div>
-                  <div class="text-sm font-extrabold text-rose-600">${c.insta.medianViews}</div>
+                <div class="bg-white/90 rounded-xl p-2.5 ring-2 ring-rose-300 shadow-sm">
+                  <div class="text-xs text-rose-600 font-semibold mb-0.5">조회수 중앙값</div>
+                  <div class="text-base sm:text-lg font-extrabold text-rose-600">${c.insta.medianViews}</div>
                 </div>
-                <div class="bg-white/80 rounded-lg p-2">
-                  <div class="text-[10px] text-slate-500">ER(참여율)</div>
-                  <div class="text-sm font-bold text-slate-800">${c.insta.er}</div>
+                <div class="bg-white/90 rounded-xl p-2.5 shadow-sm">
+                  <div class="text-xs text-slate-500 mb-0.5">ER(참여율)</div>
+                  <div class="text-base sm:text-lg font-bold text-slate-800">${c.insta.er}</div>
                 </div>
               </div>
             </div>
 
             <!-- Sub Channels (TikTok / YouTube) -->
-            <div class="space-y-2 text-xs">
+            <div class="space-y-2.5 text-xs sm:text-sm">
               <!-- TikTok -->
-              <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
-                <span class="font-semibold text-slate-700 flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-slate-900"></span> TikTok
+              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="font-semibold text-slate-700 flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span> TikTok
                 </span>
-                <span class="text-slate-500">팔로워 <b class="text-slate-800">${c.tiktok ? c.tiktok.followers : '-'}</b> / 중앙 <b class="text-slate-800">${c.tiktok ? c.tiktok.medianViews : '-'}</b></span>
+                <span class="text-slate-600">팔로워 <b class="text-slate-900">${c.tiktok ? c.tiktok.followers : '-'}</b> / 중앙 <b class="text-slate-900">${c.tiktok ? c.tiktok.medianViews : '-'}</b></span>
               </div>
               <!-- YouTube -->
-              <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
-                <span class="font-semibold text-slate-700 flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-red-500"></span> YouTube
+              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="font-semibold text-slate-700 flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> YouTube
                 </span>
-                <span class="text-slate-500">구독자 <b class="text-slate-800">${c.youtube ? c.youtube.followers : '-'}</b> / 중앙 <b class="text-slate-800">${c.youtube ? c.youtube.medianViews : '-'}</b></span>
+                <span class="text-slate-600">구독자 <b class="text-slate-900">${c.youtube ? c.youtube.followers : '-'}</b> / 중앙 <b class="text-slate-900">${c.youtube ? c.youtube.medianViews : '-'}</b></span>
               </div>
             </div>
           </div>
 
-          <!-- Card Footer (대행사 미팅용 CTA) -->
-          <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <!-- Card Footer -->
+          <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm text-slate-500">
             <span>방한 스케줄 조율 가능</span>
             <span class="font-semibold text-slate-700">전담 통역 매니저 배속</span>
           </div>
@@ -286,26 +277,9 @@
         grid.appendChild(card);
       });
 
-      // 아이콘 렌더링
       lucide.createIcons();
     }
 
-    function filterGenre(genre) {
-      document.querySelectorAll('.genre-btn').forEach(btn => {
-        btn.classList.remove('bg-slate-900', 'text-white');
-        btn.classList.add('bg-slate-100', 'text-slate-600');
-      });
-      event.target.classList.remove('bg-slate-100', 'text-slate-600');
-      event.target.classList.add('bg-slate-900', 'text-white');
-
-      if (genre === 'ALL') {
-        renderCards(CREATORS);
-      } else {
-        renderCards(CREATORS.filter(c => c.genre.includes(genre)));
-      }
-    }
-
-    // 초기 렌더링
     renderCards(CREATORS);
   </script>
 </body>
