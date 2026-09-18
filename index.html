@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>일본 인플루언서 프로필</title>
+  <title>일본 인플루언서 공식 미디어킷</title>
+
+  <!-- Open Graph (카카오톡, 슬랙 링크 미리보기) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="일본 인플루언서 공식 미디어킷 | 크리에이터 라인업">
+  <meta property="og:description" content="전 라인업 현장 통역 & 전담 디렉터 매니저 동행 케어. 방한 브랜드 촬영 전담 일본 크리에이터 프로필 리스트">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -30,10 +36,18 @@
         <span class="bg-slate-900 text-white text-[11px] font-bold px-3 py-1.5 rounded-full tracking-wider">JAPAN CREATOR</span>
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">일본 인플루언서 프로필</h1>
       </div>
-      <!-- 우측 상단: 업데이트(년/월) 바로 아래 등록 크리에이터 -->
-      <div class="text-right flex flex-col justify-center">
-        <div id="update-date" class="text-xs text-slate-400 font-medium leading-tight mb-0.5"></div>
-        <div class="text-xs sm:text-sm text-slate-600 font-medium">등록 크리에이터 <span id="total-count" class="font-bold text-slate-900">0</span>명</div>
+
+      <!-- 우측 상단: 업데이트/인원수 + 문의하기 버튼 -->
+      <div class="flex items-center gap-4 sm:gap-6">
+        <div class="text-right flex flex-col justify-center hidden xs:flex">
+          <div id="update-date" class="text-xs text-slate-400 font-medium leading-tight mb-0.5"></div>
+          <div class="text-xs sm:text-sm text-slate-600 font-medium">등록 크리에이터 <span id="total-count" class="font-bold text-slate-900">0</span>명</div>
+        </div>
+        <a href="mailto:unyconnect.info@gmail.com?subject=%5B%ED%81%AC%EB%A6%AC%EC%97%90%EC%9D%B4%ED%84%B0%20%ED%98%91%EC%97%85%20%EB%AC%B8%EC%9D%98%5D&body=%ED%9D%AC%EB%A7%9D%ED%95%98%EC%8B%9C%EB%8A%94%20%ED%81%AC%EB%A6%AC%EC%97%90%EC%9D%B4%ED%84%B0%20%EB%B2%88%ED%98%B8(%EC%98%88%3A%20%2301)%20%EB%B0%8F%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%20%EC%9D%BC%EC%A0%95%EC%9D%84%20%EB%82%A8%EA%EA%B2%A8%EC%A3%BC%EC%8B%9C%EB%A9%B4%20%EB%B9%A0%EB%A5%B4%EA%B2%8C%20%EC%95%88%EB%82%B4%EB%93%9C%EB%A6%AC%EA%B2%A0%EC%8A%B5%EB%8B%88%EB%8B%A4."
+           class="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold transition-colors shadow-xs">
+          <i data-lucide="mail" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+          <span>문의하기</span>
+        </a>
       </div>
     </div>
   </header>
@@ -94,7 +108,7 @@
               dateEl.innerText = updateText;
             }
 
-            // 2행(헤더)을 기반으로 정확한 컬럼 위치 자동 매핑
+            // 2행(헤더) 기반 자동 컬럼 인덱스 탐색
             const headers = rows[1].map(h => (h || "").trim().toLowerCase().replace(/\s+/g, ''));
             
             const findIdx = (keywords) => {
@@ -122,7 +136,7 @@
             const idxYoutubeLink = findIdx(['youtube링크', '유튜브링크', 'youtube']);
             const idxYoutubeFollower = idxYoutubeLink !== -1 ? idxYoutubeLink + 1 : -1;
 
-            // 3행부터 실제 크리에이터 데이터 파싱
+            // 3행부터 크리에이터 파싱
             const creators = [];
             for (let i = 2; i < rows.length; i++) {
               const r = rows[i];
@@ -185,7 +199,7 @@
         if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded font-medium">${c.genre}</span>`);
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.shootType}</span>`);
 
-        // 멀티 채널 뱃지 빌드 (링크 유무 및 수치 기준 자동 판별)
+        // 멀티 채널 뱃지 빌드
         const hasTiktok = (c.tiktok.link && c.tiktok.link.startsWith('http')) || (c.tiktok.followers && c.tiktok.followers !== '-' && c.tiktok.followers.trim() !== '');
         const hasYoutube = (c.youtube.link && c.youtube.link.startsWith('http')) || (c.youtube.followers && c.youtube.followers !== '-' && c.youtube.followers.trim() !== '');
 
