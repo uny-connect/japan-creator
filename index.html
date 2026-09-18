@@ -81,7 +81,7 @@
               dateEl.innerText = updateText;
             }
 
-            // 3행부터 실제 데이터 파싱
+            // 3행부터 실제 데이터 파싱 (J, K열 삭제 후 변경된 인덱스 반영)
             const creators = [];
             for (let i = 2; i < rows.length; i++) {
               const r = rows[i];
@@ -92,23 +92,21 @@
                 nameEn: r[1] || "",     // B: 영문명
                 accountName: r[2],      // C: 계정명
                 genre: r[3] || "",      // D: 콘텐츠 장르
-                gender: r[4] || "",     // E: 크리에이터 성별
-                shootType: r[8] || "",  // I: 촬영 형태
-                koreanLevel: r[9] || "",// J: 한국어 소통
-                multiChannel: r[10] || "", // K: 멀티 채널 보유
+                gender: r[4] || "",     // E: 성별
+                shootType: r[8] || "",  // I: 촬영 형태(단독/동행)
                 insta: {
-                  link: r[11] || "",
-                  followers: r[12] || "-",
-                  medianViews: r[14] || "-",
-                  er: r[15] || "-"
+                  link: r[9] || "",     // J: Instagram 링크
+                  followers: r[10] || "-", // K: 인스타 팔로워
+                  medianViews: r[12] || "-", // M: 인스타 조회수 중앙값
+                  er: r[13] || "-"      // N: 인스타 ER
                 },
                 tiktok: {
-                  link: r[16] || "",
-                  followers: r[17] || ""
+                  link: r[14] || "",    // O: TikTok 링크
+                  followers: r[15] || "" // P: 틱톡 팔로워
                 },
                 youtube: {
-                  link: r[21] || "",
-                  followers: r[22] || ""
+                  link: r[19] || "",    // T: YouTube 링크
+                  followers: r[20] || "" // U: 유튜브 구독자
                 }
               });
             }
@@ -145,9 +143,8 @@
         }
         if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded font-medium">${c.genre}</span>`);
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.shootType}</span>`);
-        if (c.koreanLevel) tags.push(`<span class="bg-amber-50 text-amber-700 border border-amber-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.koreanLevel}</span>`);
 
-        // 멀티 채널 뱃지 빌드
+        // 멀티 채널 뱃지 빌드 (링크 유무 및 팔로워 수치 기준 자동 판별)
         const hasTiktok = (c.tiktok.link && c.tiktok.link.startsWith('http')) || (c.tiktok.followers && c.tiktok.followers !== '-' && c.tiktok.followers.trim() !== '');
         const hasYoutube = (c.youtube.link && c.youtube.link.startsWith('http')) || (c.youtube.followers && c.youtube.followers !== '-' && c.youtube.followers.trim() !== '');
 
