@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- PapaParse CDN (CSV 파싱 라이브러리) -->
+  <!-- PapaParse CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <!-- Noto Sans 폰트 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,32 +16,34 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Noto Sans KR', 'Noto Sans JP', sans-serif;
+      font-family: 'Noto Sans KR', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+      letter-spacing: -0.02em;
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+<body class="bg-slate-100/70 text-slate-900 antialiased min-h-screen">
 
   <!-- Header -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
       <div class="flex items-center space-x-3 sm:space-x-4">
-        <span class="bg-rose-600 text-white text-xs sm:text-sm font-bold px-3 py-1.5 rounded-md tracking-wider">JAPAN CREATOR</span>
+        <span class="bg-gradient-to-r from-rose-500 to-rose-600 text-white text-[11px] sm:text-xs font-bold px-3 py-1.5 rounded-full tracking-wider shadow-xs">JAPAN CREATOR</span>
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">일본 인플루언서 프로필</h1>
       </div>
       <div class="text-right">
-        <div id="update-date" class="text-xs sm:text-sm text-slate-400 font-medium">업데이트 확인 중...</div>
-        <div class="text-xs sm:text-sm text-slate-600 font-semibold mt-0.5">등록 크리에이터: <span id="total-count" class="font-bold text-rose-600">0</span>명</div>
+        <div id="update-date" class="text-xs text-slate-400 font-medium"></div>
+        <div class="text-xs sm:text-sm text-slate-600 font-medium mt-0.5">등록 크리에이터: <span id="total-count" class="font-bold text-rose-600">0</span>명</div>
       </div>
     </div>
   </header>
 
   <!-- Creator Grid -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div id="loading" class="text-center py-20 text-slate-400 font-medium">
-      데이터를 불러오는 중입니다...
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div id="loading" class="flex flex-col items-center justify-center py-28 text-slate-400 gap-3">
+      <div class="w-8 h-8 border-3 border-rose-500 border-t-transparent rounded-full animate-spin"></div>
+      <span class="text-sm font-medium">데이터를 불러오는 중입니다...</span>
     </div>
-    <div id="creator-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+    <div id="creator-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
       <!-- JavaScript로 카드 렌더링 -->
     </div>
   </main>
@@ -64,25 +66,26 @@
             // 1행에서 업데이트 날짜 추출 (A1 셀)
             const firstCell = rows[0][0] || "";
             const dateMatch = firstCell.match(/\d{4}[.-]\d{2}[.-]\d{2}/);
+            const dateEl = document.getElementById('update-date');
             if (dateMatch) {
-              document.getElementById('update-date').innerText = `업데이트: ${dateMatch[0]} 기준`;
+              dateEl.innerText = `업데이트: ${dateMatch[0]} 기준`;
             } else {
-              document.getElementById('update-date').innerText = `실시간 연동 중`;
+              dateEl.innerText = '';
             }
 
-            // 3행부터 실제 크리에이터 데이터 (헤더 제외)
+            // 3행부터 실제 크리에이터 데이터
             const creators = [];
             for (let i = 2; i < rows.length; i++) {
               const r = rows[i];
-              if (!r[0] || isNaN(r[0])) continue; // NO 번호가 없으면 스킵
+              if (!r[0] || isNaN(r[0])) continue;
 
               creators.push({
                 no: r[0],               // A: NO
-                nameEn: r[1] || "",     // B: 이름(영문)
+                nameEn: r[1] || "",     // B: 이름 (영어)
                 accountName: r[2],      // C: 계정명
                 genre: r[3] || "",      // D: 콘텐츠 장르
-                gender: r[4] || "",     // E: 크리에이터 성별
-                shootType: r[8] || "",  // I: 촬영 형태(단독/동행)
+                gender: r[4] || "",     // E: 성별
+                shootType: r[8] || "",  // I: 촬영 형태
                 koreanLevel: r[9] || "",// J: 한국어 소통
                 insta: {
                   link: r[11] || "",
@@ -107,7 +110,9 @@
           }
         });
       } catch (err) {
-        document.getElementById('loading').innerText = "데이터를 불러오는 중 오류가 발생했습니다. 구글 시트 배포 설정을 확인해 주세요.";
+        document.getElementById('loading').innerHTML = `
+          <div class="text-rose-500 font-medium text-sm">데이터를 불러오는 중 오류가 발생했습니다.</div>
+        `;
         console.error(err);
       }
     }
@@ -121,37 +126,51 @@
 
       data.forEach(c => {
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col justify-between";
+        card.className = "bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 overflow-hidden flex flex-col justify-between";
 
+        // 태그 빌드: 성별(남/여)이 항상 맨 앞
         const tags = [];
-        if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-xs sm:text-sm px-3 py-1 rounded-md font-semibold">${c.genre}</span>`);
-        if (c.gender) tags.push(`<span class="bg-blue-50 text-blue-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.gender}</span>`);
-        if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.shootType}</span>`);
-        if (c.koreanLevel) tags.push(`<span class="bg-amber-50 text-amber-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.koreanLevel}</span>`);
+        if (c.gender) {
+          const genderColor = c.gender === '여' 
+            ? 'bg-rose-50 text-rose-600 border border-rose-100/80' 
+            : 'bg-blue-50 text-blue-600 border border-blue-100/80';
+          tags.push(`<span class="${genderColor} text-[11px] px-2 py-0.5 rounded-md font-semibold">${c.gender}</span>`);
+        }
+        if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded-md font-medium">${c.genre}</span>`);
+        if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100/80 text-[11px] px-2 py-0.5 rounded-md font-medium">${c.shootType}</span>`);
+        if (c.koreanLevel) tags.push(`<span class="bg-amber-50 text-amber-700 border border-amber-100/80 text-[11px] px-2 py-0.5 rounded-md font-medium">${c.koreanLevel}</span>`);
 
-        // 틱톡 및 유튜브 존재 여부에 따른 서브채널 뷰 빌드
+        // 서브 채널 (TikTok / YouTube) 레이아웃 정돈
         let subChannelsHtml = '';
         const hasTiktok = c.tiktok.followers && c.tiktok.followers !== '-' && c.tiktok.followers.trim() !== '';
         const hasYoutube = c.youtube.followers && c.youtube.followers !== '-' && c.youtube.followers.trim() !== '';
 
         if (hasTiktok || hasYoutube) {
-          subChannelsHtml += '<div class="space-y-2.5 text-xs sm:text-sm mt-4">';
+          subChannelsHtml += '<div class="space-y-2 pt-1">';
           if (hasTiktok) {
             subChannelsHtml += `
-              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="font-semibold text-slate-700 flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span> TikTok
+              <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                <span class="font-semibold text-slate-800 flex items-center gap-1.5 min-w-[70px]">
+                  <span class="w-2 h-2 rounded-full bg-slate-900"></span> TikTok
                 </span>
-                <span class="text-slate-600">팔로워 <b class="text-slate-900">${c.tiktok.followers}</b> / 조회수 중앙값 <b class="text-slate-900">${c.tiktok.medianViews || '-'}</b></span>
+                <div class="flex items-center gap-3 text-slate-500 font-normal">
+                  <span>팔로워 <b class="text-slate-800 font-semibold">${c.tiktok.followers}</b></span>
+                  <span class="text-slate-300">|</span>
+                  <span>조회수 중앙 <b class="text-slate-800 font-semibold">${c.tiktok.medianViews || '-'}</b></span>
+                </div>
               </div>`;
           }
           if (hasYoutube) {
             subChannelsHtml += `
-              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="font-semibold text-slate-700 flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> YouTube
+              <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                <span class="font-semibold text-slate-800 flex items-center gap-1.5 min-w-[70px]">
+                  <span class="w-2 h-2 rounded-full bg-red-500"></span> YouTube
                 </span>
-                <span class="text-slate-600">구독자 <b class="text-slate-900">${c.youtube.followers}</b> / 조회수 중앙값 <b class="text-slate-900">${c.youtube.medianViews || '-'}</b></span>
+                <div class="flex items-center gap-3 text-slate-500 font-normal">
+                  <span>구독자 <b class="text-slate-800 font-semibold">${c.youtube.followers}</b></span>
+                  <span class="text-slate-300">|</span>
+                  <span>조회수 중앙 <b class="text-slate-800 font-semibold">${c.youtube.medianViews || '-'}</b></span>
+                </div>
               </div>`;
           }
           subChannelsHtml += '</div>';
@@ -159,39 +178,45 @@
 
         card.innerHTML = `
           <div class="p-6">
-            <!-- Header -->
-            <div class="flex items-center justify-between gap-2 mb-3">
-              <span class="text-sm font-bold text-slate-400">NO.${c.no}</span>
+            <!-- Header (NO & Tags) -->
+            <div class="flex items-center justify-between gap-2 mb-3.5">
+              <span class="text-xs font-bold text-slate-400 tracking-wider">NO.${c.no}</span>
               <div class="flex flex-wrap gap-1.5 justify-end">
                 ${tags.join('')}
               </div>
             </div>
             
-            <!-- Creator Names -->
-            <div class="mb-5">
-              ${c.nameEn ? `<div class="text-xs font-semibold text-rose-600 tracking-wide uppercase mb-0.5">${c.nameEn}</div>` : ''}
-              <h3 class="text-lg sm:text-xl font-bold text-slate-900 leading-snug line-clamp-2 select-none">
+            <!-- Creator Profile Title & Name -->
+            <div class="mb-5 min-h-[58px] flex flex-col justify-end">
+              ${c.nameEn ? `<div class="text-[11px] font-bold text-rose-500 tracking-wider uppercase mb-1">${c.nameEn}</div>` : ''}
+              <h3 class="text-lg font-bold text-slate-900 leading-snug line-clamp-2 select-none">
                 ${c.accountName}
               </h3>
             </div>
 
             <!-- Main Metric: Instagram -->
-            <div class="bg-gradient-to-br from-rose-50 to-orange-50 border border-rose-100 rounded-2xl p-4">
-              <div class="flex items-center justify-between text-xs sm:text-sm font-bold text-rose-600 mb-3">
-                <span class="flex items-center gap-1.5"><i data-lucide="instagram" class="w-4 h-4"></i> Instagram (메인)</span>
-                ${c.insta.link && c.insta.link.startsWith('http') ? `<a href="${c.insta.link}" target="_blank" rel="noopener" class="hover:underline flex items-center">SNS 바로가기 <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i></a>` : ''}
+            <div class="bg-gradient-to-br from-rose-50/60 via-orange-50/40 to-white border border-rose-100/90 rounded-2xl p-4 mb-4 shadow-2xs">
+              <div class="flex items-center justify-between text-xs font-bold text-slate-800 mb-3.5">
+                <span class="flex items-center gap-1.5 text-rose-600">
+                  <i data-lucide="instagram" class="w-4 h-4"></i> Instagram
+                </span>
+                ${c.insta.link && c.insta.link.startsWith('http') ? `
+                  <a href="${c.insta.link}" target="_blank" rel="noopener" class="text-slate-500 hover:text-rose-600 font-medium flex items-center transition-colors">
+                    SNS 바로가기 <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i>
+                  </a>
+                ` : ''}
               </div>
               <div class="grid grid-cols-3 gap-2 text-center">
-                <div class="bg-white/90 rounded-xl p-2.5 shadow-sm">
-                  <div class="text-xs text-slate-500 mb-0.5">팔로워</div>
+                <div class="bg-white/95 rounded-xl py-2 px-1 border border-slate-100 shadow-2xs">
+                  <div class="text-[10px] text-slate-400 font-medium mb-0.5">팔로워</div>
                   <div class="text-sm sm:text-base font-bold text-slate-800">${c.insta.followers}</div>
                 </div>
-                <div class="bg-white/90 rounded-xl p-2.5 ring-2 ring-rose-300 shadow-sm">
-                  <div class="text-xs text-rose-600 font-semibold mb-0.5">조회수 중앙값</div>
+                <div class="bg-white rounded-xl py-2 px-1 ring-1.5 ring-rose-400/80 shadow-2xs">
+                  <div class="text-[10px] text-rose-500 font-bold mb-0.5">조회수 중앙값</div>
                   <div class="text-sm sm:text-base font-extrabold text-rose-600">${c.insta.medianViews}</div>
                 </div>
-                <div class="bg-white/90 rounded-xl p-2.5 shadow-sm">
-                  <div class="text-xs text-slate-500 mb-0.5">ER(참여율)</div>
+                <div class="bg-white/95 rounded-xl py-2 px-1 border border-slate-100 shadow-2xs">
+                  <div class="text-[10px] text-slate-400 font-medium mb-0.5">ER(참여율)</div>
                   <div class="text-sm sm:text-base font-bold text-slate-800">${c.insta.er}</div>
                 </div>
               </div>
@@ -202,9 +227,9 @@
           </div>
 
           <!-- Card Footer -->
-          <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm text-slate-500">
+          <div class="px-6 py-3 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
             <span>방한 스케줄 조율 가능</span>
-            <span class="font-semibold text-slate-700">전담 통역 매니저 배속</span>
+            <span class="font-medium text-slate-600">전담 통역 매니저 배속</span>
           </div>
         `;
 
@@ -214,7 +239,6 @@
       lucide.createIcons();
     }
 
-    // 데이터 로드 시작
     loadSheetData();
   </script>
 </body>
