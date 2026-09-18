@@ -64,7 +64,7 @@
             const rows = results.data;
             if (rows.length < 3) return;
 
-            // B1 셀 및 1행 전체에서 날짜 추출 (YYYY.MM 기준)
+            // 1행에서 업데이트 날짜 추출 (YYYY.MM 기준)
             let updateText = "";
             if (rows.length > 0 && rows[0]) {
               const rawDateStr = rows[0][1] || rows[0].join(" ");
@@ -81,32 +81,61 @@
               dateEl.innerText = updateText;
             }
 
-            // 3행부터 실제 데이터 파싱 (J, K열 삭제 후 변경된 인덱스 반영)
+            // 2행(헤더)을 기반으로 정확한 컬럼 위치 자동 매핑
+            const headers = rows[1].map(h => (h || "").trim().toLowerCase().replace(/\s+/g, ''));
+            
+            const findIdx = (keywords) => {
+              return headers.findIndex(h => keywords.some(k => h.includes(k.toLowerCase())));
+            };
+
+            // 플랫폼별 컬럼 위치 정확히 산출
+            const idxNo = 0;
+            const idxNameEn = 1;
+            const idxAccount = 2;
+            const idxGenre = 3;
+            const idxGender = 4;
+            const idxShootType = findIdx(['촬영형태']);
+
+            // 인스타그램 구간
+            const idxInstaLink = findIdx(['instagram링크', '인스타그램링크', 'instagram']);
+            const idxInstaFollower = idxInstaLink + 1;
+            const idxInstaMedian = idxInstaLink + 3; // 조회수 중앙값
+            const idxInstaER = idxInstaLink + 4;     // ER
+
+            // 틱톡 구간
+            const idxTiktokLink = findIdx(['tiktok링크', '틱톡링크', 'tiktok']);
+            const idxTiktokFollower = idxTiktokLink !== -1 ? idxTiktokLink + 1 : -1;
+
+            // 유튜브 구간
+            const idxYoutubeLink = findIdx(['youtube링크', '유튜브링크', 'youtube']);
+            const idxYoutubeFollower = idxYoutubeLink !== -1 ? idxYoutubeLink + 1 : -1;
+
+            // 3행부터 실제 크리에이터 데이터 파싱
             const creators = [];
             for (let i = 2; i < rows.length; i++) {
               const r = rows[i];
               if (!r[0] || isNaN(r[0])) continue;
 
               creators.push({
-                no: r[0],               // A: NO
-                nameEn: r[1] || "",     // B: 영문명
-                accountName: r[2],      // C: 계정명
-                genre: r[3] || "",      // D: 콘텐츠 장르
-                gender: r[4] || "",     // E: 성별
-                shootType: r[8] || "",  // I: 촬영 형태(단독/동행)
+                no: r[idxNo] || "",
+                nameEn: r[idxNameEn] || "",
+                accountName: r[idxAccount] || "",
+                genre: r[idxGenre] || "",
+                gender: r[idxGender] || "",
+                shootType: (idxShootType !== -1 && r[idxShootType]) ? r[idxShootType] : "",
                 insta: {
-                  link: r[9] || "",     // J: Instagram 링크
-                  followers: r[10] || "-", // K: 인스타 팔로워
-                  medianViews: r[12] || "-", // M: 인스타 조회수 중앙값
-                  er: r[13] || "-"      // N: 인스타 ER
+                  link: (idxInstaLink !== -1 && r[idxInstaLink]) ? r[idxInstaLink].trim() : "",
+                  followers: (idxInstaFollower !== -1 && r[idxInstaFollower]) ? r[idxInstaFollower].trim() : "-",
+                  medianViews: (idxInstaMedian !== -1 && r[idxInstaMedian]) ? r[idxInstaMedian].trim() : "-",
+                  er: (idxInstaER !== -1 && r[idxInstaER]) ? r[idxInstaER].trim() : "-"
                 },
                 tiktok: {
-                  link: r[14] || "",    // O: TikTok 링크
-                  followers: r[15] || "" // P: 틱톡 팔로워
+                  link: (idxTiktokLink !== -1 && r[idxTiktokLink]) ? r[idxTiktokLink].trim() : "",
+                  followers: (idxTiktokFollower !== -1 && r[idxTiktokFollower]) ? r[idxTiktokFollower].trim() : ""
                 },
                 youtube: {
-                  link: r[19] || "",    // T: YouTube 링크
-                  followers: r[20] || "" // U: 유튜브 구독자
+                  link: (idxYoutubeLink !== -1 && r[idxYoutubeLink]) ? r[idxYoutubeLink].trim() : "",
+                  followers: (idxYoutubeFollower !== -1 && r[idxYoutubeFollower]) ? r[idxYoutubeFollower].trim() : ""
                 }
               });
             }
@@ -144,7 +173,7 @@
         if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded font-medium">${c.genre}</span>`);
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.shootType}</span>`);
 
-        // 멀티 채널 뱃지 빌드 (링크 유무 및 팔로워 수치 기준 자동 판별)
+        // 멀티 채널 뱃지 빌드 (링크 유무 및 팔로워 기준 자동 판별)
         const hasTiktok = (c.tiktok.link && c.tiktok.link.startsWith('http')) || (c.tiktok.followers && c.tiktok.followers !== '-' && c.tiktok.followers.trim() !== '');
         const hasYoutube = (c.youtube.link && c.youtube.link.startsWith('http')) || (c.youtube.followers && c.youtube.followers !== '-' && c.youtube.followers.trim() !== '');
 
