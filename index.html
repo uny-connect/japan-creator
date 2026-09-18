@@ -32,7 +32,7 @@
       </div>
       <!-- 우측 상단: 업데이트(년/월) 바로 아래 등록 크리에이터 -->
       <div class="text-right flex flex-col justify-center">
-        <div id="update-date" class="text-xs text-slate-400 font-medium"></div>
+        <div id="update-date" class="text-xs text-slate-400 font-medium leading-tight mb-0.5"></div>
         <div class="text-xs sm:text-sm text-slate-600 font-medium">등록 크리에이터 <span id="total-count" class="font-bold text-slate-900">0</span>명</div>
       </div>
     </div>
@@ -64,14 +64,21 @@
             const rows = results.data;
             if (rows.length < 3) return;
 
-            // 1행에서 업데이트 날짜 추출 -> 년.월 까지만 표시
-            const firstCell = rows[0][0] || "";
-            const dateMatch = firstCell.match(/(\d{4})[.-](\d{2})/);
+            // B1 셀 및 1행 전체에서 날짜 추출 (YYYY.MM 기준)
+            let updateText = "";
+            if (rows.length > 0 && rows[0]) {
+              const rawDateStr = rows[0][1] || rows[0].join(" ");
+              const dateMatch = rawDateStr.match(/(\d{4})[.\-\/](\d{1,2})/);
+              if (dateMatch) {
+                const year = dateMatch[1];
+                const month = dateMatch[2].padStart(2, '0');
+                updateText = `${year}.${month} 기준`;
+              }
+            }
+
             const dateEl = document.getElementById('update-date');
-            if (dateMatch) {
-              dateEl.innerText = `${dateMatch[1]}.${dateMatch[2]} 기준`;
-            } else {
-              dateEl.innerText = '';
+            if (dateEl) {
+              dateEl.innerText = updateText;
             }
 
             // 3행부터 실제 데이터 파싱
@@ -85,10 +92,10 @@
                 nameEn: r[1] || "",     // B: 영문명
                 accountName: r[2],      // C: 계정명
                 genre: r[3] || "",      // D: 콘텐츠 장르
-                gender: r[4] || "",     // E: 성별
+                gender: r[4] || "",     // E: 크리에이터 성별
                 shootType: r[8] || "",  // I: 촬영 형태
                 koreanLevel: r[9] || "",// J: 한국어 소통
-                multiChannel: r[10] || "", // K: 멀티 채널 보유 여부
+                multiChannel: r[10] || "", // K: 멀티 채널 보유
                 insta: {
                   link: r[11] || "",
                   followers: r[12] || "-",
@@ -140,9 +147,9 @@
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.shootType}</span>`);
         if (c.koreanLevel) tags.push(`<span class="bg-amber-50 text-amber-700 border border-amber-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.koreanLevel}</span>`);
 
-        // 멀티 채널 보유 여부 뱃지 빌드 (숫자 대신 깔끔하게 태그로만 노출)
-        const hasTiktok = (c.tiktok.link && c.tiktok.link.startsWith('http')) || (c.tiktok.followers && c.tiktok.followers !== '-');
-        const hasYoutube = (c.youtube.link && c.youtube.link.startsWith('http')) || (c.youtube.followers && c.youtube.followers !== '-');
+        // 멀티 채널 뱃지 빌드
+        const hasTiktok = (c.tiktok.link && c.tiktok.link.startsWith('http')) || (c.tiktok.followers && c.tiktok.followers !== '-' && c.tiktok.followers.trim() !== '');
+        const hasYoutube = (c.youtube.link && c.youtube.link.startsWith('http')) || (c.youtube.followers && c.youtube.followers !== '-' && c.youtube.followers.trim() !== '');
 
         let multiChannelHtml = '';
         if (hasTiktok || hasYoutube) {
@@ -157,11 +164,16 @@
           `;
         }
 
+        // 인덱스 번호 포맷팅 (#01, #02, ...)
+        const formattedNo = `#${String(c.no).padStart(2, '0')}`;
+
         card.innerHTML = `
           <div class="p-6">
-            <!-- Header (NO & Tags) -->
+            <!-- Header (Index Badge & Tags) -->
             <div class="flex items-center justify-between gap-2 mb-4">
-              <span class="text-xs font-bold text-slate-400 tracking-wider">NO.${c.no}</span>
+              <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/60 text-[11px] font-bold text-slate-500 tracking-wider">
+                ${formattedNo}
+              </span>
               <div class="flex flex-wrap gap-1.5 justify-end">
                 ${tags.join('')}
               </div>
@@ -177,7 +189,6 @@
 
             <!-- Main Metric: Instagram -->
             <div class="rounded-xl border border-slate-200/90 bg-slate-50/60 p-4">
-              <!-- 깔끔하게 정렬된 Instagram 헤더 (마크 제거) -->
               <div class="flex items-center justify-between mb-3.5">
                 <span class="text-xs font-bold text-slate-900 tracking-tight">Instagram</span>
                 ${c.insta.link && c.insta.link.startsWith('http') ? `
@@ -208,7 +219,7 @@
             ${multiChannelHtml}
           </div>
 
-          <!-- Card Footer (우측 매니저 배속 단독 배치) -->
+          <!-- Card Footer -->
           <div class="px-6 py-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-end text-xs">
             <span class="font-medium text-slate-600">현장 통역&디렉터 매니저 동행</span>
           </div>
