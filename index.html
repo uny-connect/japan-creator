@@ -47,7 +47,6 @@
   </main>
 
   <script>
-    // ★ Step 2에서 복사한 공개용 탭의 CSV 주소를 여기에 넣으세요 ★
     const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pub?gid=588148010&single=true&output=csv";
 
     async function loadSheetData() {
@@ -71,36 +70,35 @@
               document.getElementById('update-date').innerText = `실시간 연동 중`;
             }
 
-            // 3행부터 실제 크리에이터 데이터 (헤더 행 제외)
+            // 3행부터 실제 크리에이터 데이터 (헤더 제외)
             const creators = [];
             for (let i = 2; i < rows.length; i++) {
               const r = rows[i];
-              if (!r[0] || isNaN(r[0])) continue; // NO 번호가 없으면 제외
+              if (!r[0] || isNaN(r[0])) continue; // NO 번호가 없으면 스킵
 
               creators.push({
                 no: r[0],               // A: NO
-                nameEn: r[1] || "",     // B: 이름 (영어)
+                nameEn: r[1] || "",     // B: 이름(영문)
                 accountName: r[2],      // C: 계정명
                 genre: r[3] || "",      // D: 콘텐츠 장르
-                gender: r[4] || "",     // E: 성별
-                shootType: r[8] || "",  // I: 촬영 형태
+                gender: r[4] || "",     // E: 크리에이터 성별
+                shootType: r[8] || "",  // I: 촬영 형태(단독/동행)
                 koreanLevel: r[9] || "",// J: 한국어 소통
                 insta: {
-                  link: r[11] || "#",
+                  link: r[11] || "",
                   followers: r[12] || "-",
                   medianViews: r[14] || "-",
                   er: r[15] || "-"
                 },
                 tiktok: {
                   link: r[16] || "",
-                  followers: r[17] || "-",
-                  medianViews: r[19] || "-",
-                  er: r[20] || "-"
+                  followers: r[17] || "",
+                  medianViews: r[19] || ""
                 },
                 youtube: {
                   link: r[21] || "",
-                  followers: r[22] || "-",
-                  medianViews: r[23] || "-"
+                  followers: r[22] || "",
+                  medianViews: r[23] || ""
                 }
               });
             }
@@ -109,7 +107,7 @@
           }
         });
       } catch (err) {
-        document.getElementById('loading').innerText = "데이터를 불러오는 중 오류가 발생했습니다. CSV URL을 확인해 주세요.";
+        document.getElementById('loading').innerText = "데이터를 불러오는 중 오류가 발생했습니다. 구글 시트 배포 설정을 확인해 주세요.";
         console.error(err);
       }
     }
@@ -131,6 +129,34 @@
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.shootType}</span>`);
         if (c.koreanLevel) tags.push(`<span class="bg-amber-50 text-amber-700 text-xs sm:text-sm px-2.5 py-1 rounded-md font-medium">${c.koreanLevel}</span>`);
 
+        // 틱톡 및 유튜브 존재 여부에 따른 서브채널 뷰 빌드
+        let subChannelsHtml = '';
+        const hasTiktok = c.tiktok.followers && c.tiktok.followers !== '-' && c.tiktok.followers.trim() !== '';
+        const hasYoutube = c.youtube.followers && c.youtube.followers !== '-' && c.youtube.followers.trim() !== '';
+
+        if (hasTiktok || hasYoutube) {
+          subChannelsHtml += '<div class="space-y-2.5 text-xs sm:text-sm mt-4">';
+          if (hasTiktok) {
+            subChannelsHtml += `
+              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="font-semibold text-slate-700 flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span> TikTok
+                </span>
+                <span class="text-slate-600">팔로워 <b class="text-slate-900">${c.tiktok.followers}</b> / 조회수 중앙값 <b class="text-slate-900">${c.tiktok.medianViews || '-'}</b></span>
+              </div>`;
+          }
+          if (hasYoutube) {
+            subChannelsHtml += `
+              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="font-semibold text-slate-700 flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> YouTube
+                </span>
+                <span class="text-slate-600">구독자 <b class="text-slate-900">${c.youtube.followers}</b> / 조회수 중앙값 <b class="text-slate-900">${c.youtube.medianViews || '-'}</b></span>
+              </div>`;
+          }
+          subChannelsHtml += '</div>';
+        }
+
         card.innerHTML = `
           <div class="p-6">
             <!-- Header -->
@@ -150,10 +176,10 @@
             </div>
 
             <!-- Main Metric: Instagram -->
-            <div class="bg-gradient-to-br from-rose-50 to-orange-50 border border-rose-100 rounded-2xl p-4 mb-5">
+            <div class="bg-gradient-to-br from-rose-50 to-orange-50 border border-rose-100 rounded-2xl p-4">
               <div class="flex items-center justify-between text-xs sm:text-sm font-bold text-rose-600 mb-3">
                 <span class="flex items-center gap-1.5"><i data-lucide="instagram" class="w-4 h-4"></i> Instagram (메인)</span>
-                ${c.insta.link && c.insta.link !== '#' ? `<a href="${c.insta.link}" target="_blank" rel="noopener" class="hover:underline flex items-center">SNS 바로가기 <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i></a>` : ''}
+                ${c.insta.link && c.insta.link.startsWith('http') ? `<a href="${c.insta.link}" target="_blank" rel="noopener" class="hover:underline flex items-center">SNS 바로가기 <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1"></i></a>` : ''}
               </div>
               <div class="grid grid-cols-3 gap-2 text-center">
                 <div class="bg-white/90 rounded-xl p-2.5 shadow-sm">
@@ -172,20 +198,7 @@
             </div>
 
             <!-- Sub Channels (TikTok / YouTube) -->
-            <div class="space-y-2.5 text-xs sm:text-sm">
-              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="font-semibold text-slate-700 flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span> TikTok
-                </span>
-                <span class="text-slate-600">팔로워 <b class="text-slate-900">${c.tiktok.followers}</b> / 조회수 중앙값 <b class="text-slate-900">${c.tiktok.medianViews}</b></span>
-              </div>
-              <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <span class="font-semibold text-slate-700 flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> YouTube
-                </span>
-                <span class="text-slate-600">구독자 <b class="text-slate-900">${c.youtube.followers}</b> / 조회수 중앙값 <b class="text-slate-900">${c.youtube.medianViews}</b></span>
-              </div>
-            </div>
+            ${subChannelsHtml}
           </div>
 
           <!-- Card Footer -->
