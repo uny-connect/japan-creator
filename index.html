@@ -212,9 +212,21 @@
 // 1. 위 1단계에서 복사한 구글 Apps Script 웹 앱 URL을 따옴표 안에 넣어주세요
     const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxrix85xvzlTyr1fP6ntG9zBwS7Zx67-YfjEqOXoa00ZV52PAOyNkFYAt1UA23YF39N/exec";
 
-    // 2. 폼 제출 시 백그라운드 전송 처리 (메일 창이 뜨지 않음)
+// 폼 제출 시 백그라운드 전송 처리
     async function handleInquirySubmit(e) {
       e.preventDefault();
+
+      const emailInput = document.getElementById('user-contact');
+      const emailValue = emailInput.value.trim();
+
+      // [추가] 정확한 이메일 형식 검증 (도메인 확장자가 2자 이상인지 체크: .com, .net, .co.kr 등)
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      
+      if (!emailRegex.test(emailValue)) {
+        alert("올바른 이메일 주소를 입력해 주세요. (예: name@company.com)");
+        emailInput.focus();
+        return; // 전송 중단
+      }
 
       const submitBtn = document.getElementById('submit-btn');
       submitBtn.disabled = true;
@@ -223,12 +235,11 @@
       const payload = {
         company: document.getElementById('user-company').value.trim(),
         name: document.getElementById('user-name').value.trim(),
-        contact: document.getElementById('user-contact').value.trim(),
+        contact: emailValue,
         message: document.getElementById('user-message').value.trim()
       };
 
       try {
-        // 구글 스크립트로 데이터 전송 (방문자 PC 메일 앱 안 열림)
         await fetch(APPS_SCRIPT_WEBAPP_URL, {
           method: "POST",
           mode: "no-cors",
