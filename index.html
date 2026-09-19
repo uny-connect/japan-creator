@@ -106,12 +106,16 @@
                    class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
           </div>
 
-          <div>
+<div>
             <label for="user-contact" class="block text-xs font-bold text-slate-700 mb-1">회신받을 이메일 <span class="text-rose-500">*</span></label>
             <input type="email" id="user-contact" required placeholder="email@company.com"
+                   oninput="clearEmailError()"
                    class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
+            <!-- [추가] 입력칸 바로 밑 에러 안내 문구 -->
+            <p id="email-error-msg" class="hidden text-[11px] text-rose-500 mt-1 font-medium leading-tight">
+              올바른 이메일 주소를 입력해 주세요. (예: name@company.com)
+            </p>
           </div>
-        </div>
 
         <div>
           <label for="user-message" class="block text-xs font-bold text-slate-700 mb-1">문의 내용 (선택)</label>
@@ -225,17 +229,34 @@
       return true;
     }
 
+// 에러 상태 초기화 (사용자가 다시 타이핑을 시작할 때 자동 호출)
+    function clearEmailError() {
+      const emailInput = document.getElementById('user-contact');
+      const errorMsg = document.getElementById('email-error-msg');
+      if (errorMsg) errorMsg.classList.add('hidden');
+      if (emailInput) {
+        emailInput.classList.remove('border-rose-500', 'bg-rose-50/30', 'focus:ring-rose-500');
+        emailInput.classList.add('border-slate-200', 'bg-slate-50', 'focus:ring-slate-900');
+      }
+    }
+
     // 폼 제출 처리
     async function handleInquirySubmit(e) {
       e.preventDefault();
 
       const emailInput = document.getElementById('user-contact');
       const emailValue = emailInput.value.trim();
+      const errorMsg = document.getElementById('email-error-msg');
 
+      // 팝업(alert) 대신 인풋창 아래에 에러 표시
       if (!isValidEmail(emailValue)) {
-        alert("이메일 주소를 다시 확인해 주세요. (예: name@company.com)");
+        if (errorMsg) errorMsg.classList.remove('hidden');
+        emailInput.classList.remove('border-slate-200', 'bg-slate-50', 'focus:ring-slate-900');
+        emailInput.classList.add('border-rose-500', 'bg-rose-50/30', 'focus:ring-rose-500');
         emailInput.focus();
-        return;
+        return; // 전송 중단
+      } else {
+        clearEmailError();
       }
 
       const submitBtn = document.getElementById('submit-btn');
@@ -269,6 +290,7 @@
         sheetLinkBtn.href = PUBLIC_SHEET_VIEW_URL;
 
         document.getElementById('inquiry-form').reset();
+        clearEmailError();
         lucide.createIcons();
 
       } catch (err) {
