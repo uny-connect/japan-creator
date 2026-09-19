@@ -91,18 +91,26 @@
         </button>
       </div>
 
-      <!-- Step 1: Modal Body (Form) -->
+<!-- Step 1: Modal Body (Form) -->
       <form id="inquiry-form" onsubmit="handleInquirySubmit(event)" class="p-6 space-y-4">
         <div>
-          <label for="user-name" class="block text-xs font-bold text-slate-700 mb-1.5">이름 / 담당자명 <span class="text-rose-500">*</span></label>
-          <input type="text" id="user-name" required placeholder="홍길동 (또는 기업/대행사명)"
+          <label for="user-company" class="block text-xs font-bold text-slate-700 mb-1.5">회사명 / 브랜드명 <span class="text-rose-500">*</span></label>
+          <input type="text" id="user-company" required placeholder="예: (주)유니커넥트 또는 브랜드명"
                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
         </div>
 
-        <div>
-          <label for="user-contact" class="block text-xs font-bold text-slate-700 mb-1.5">연락처 (이메일 또는 휴대폰 번호) <span class="text-rose-500">*</span></label>
-          <input type="text" id="user-contact" required placeholder="010-0000-0000 또는 email@company.com"
-                 class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="user-name" class="block text-xs font-bold text-slate-700 mb-1.5">담당자명 / 직책 <span class="text-rose-500">*</span></label>
+            <input type="text" id="user-name" required placeholder="홍길동 팀장"
+                   class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
+          </div>
+
+          <div>
+            <label for="user-contact" class="block text-xs font-bold text-slate-700 mb-1.5">연락처 (이메일/휴대폰) <span class="text-rose-500">*</span></label>
+            <input type="text" id="user-contact" required placeholder="010-0000-0000 / email@co.kr"
+                   class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
+          </div>
         </div>
 
         <div>
@@ -118,7 +126,7 @@
           </button>
           <button type="submit" id="submit-btn"
                   class="px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors shadow-sm cursor-pointer">
-            제출하고 시트 보기
+            제출 후 전체 리스트 보기
           </button>
         </div>
       </form>
@@ -200,39 +208,38 @@
       if (e.key === 'Escape') closeContactModal();
     });
 
-    // 폼 제출 시: 메일 클라이언트로 전송 트리거 후 모달을 완료 화면으로 변경
+// 폼 제출 시 처리
     function handleInquirySubmit(e) {
       e.preventDefault();
+      const company = document.getElementById('user-company').value.trim();
       const name = document.getElementById('user-name').value.trim();
       const contact = document.getElementById('user-contact').value.trim();
       const message = document.getElementById('user-message').value.trim();
 
-      // 메일 링크 준비
-      const subject = encodeURIComponent(`[크리에이터 협업/시트요청] ${name}님의 문의`);
+      // 메일 제목 및 본문 구성
+      const subject = encodeURIComponent(`[크리에이터 협업/시트요청] ${company} ${name}님의 문의`);
       const body = encodeURIComponent(
-        `■ 담당자/기업명: ${name}\n` +
+        `■ 회사/브랜드명: ${company}\n` +
+        `■ 담당자명: ${name}\n` +
         `■ 연락처: ${contact}\n\n` +
         `■ 문의 내용:\n${message || '(내용 없음 - 시트 열람 요청)'}`
       );
 
-      // 백그라운드에서 메일 열기 트리거
       const mailtoLink = `mailto:unyconnect.info@gmail.com?subject=${subject}&body=${body}`;
       
-      // 모달 화면을 'Step 2: 완료 및 시트 오픈' 화면으로 전환
+      // Step 2: 완료 화면으로 전환
       document.getElementById('inquiry-form').classList.add('hidden');
       document.getElementById('inquiry-success-step').classList.remove('hidden');
       document.getElementById('modal-title').innerText = "접수 완료";
       document.getElementById('modal-desc').innerText = "요청해 주셔서 감사합니다.";
       
-      // 시트 링크 주소 지정
       const sheetLinkBtn = document.getElementById('sheet-open-link');
       sheetLinkBtn.href = PUBLIC_SHEET_VIEW_URL;
 
-      // 폼 리셋
       document.getElementById('inquiry-form').reset();
       lucide.createIcons();
 
-      // 메일 창 열기 (필요 시)
+      // 메일 프로그램 호출
       window.location.href = mailtoLink;
     }
 
