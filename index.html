@@ -208,39 +208,52 @@
       if (e.key === 'Escape') closeContactModal();
     });
 
-// 폼 제출 시 처리
-    function handleInquirySubmit(e) {
+// 1. 위 1단계에서 복사한 구글 Apps Script 웹 앱 URL을 따옴표 안에 넣어주세요
+    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxrix85xvzlTyr1fP6ntG9zBwS7Zx67-YfjEqOXoa00ZV52PAOyNkFYAt1UA23YF39N/exec";
+
+    // 2. 폼 제출 시 백그라운드 전송 처리 (메일 창이 뜨지 않음)
+    async function handleInquirySubmit(e) {
       e.preventDefault();
-      const company = document.getElementById('user-company').value.trim();
-      const name = document.getElementById('user-name').value.trim();
-      const contact = document.getElementById('user-contact').value.trim();
-      const message = document.getElementById('user-message').value.trim();
 
-      // 메일 제목 및 본문 구성
-      const subject = encodeURIComponent(`[크리에이터 협업/시트요청] ${company} ${name}님의 문의`);
-      const body = encodeURIComponent(
-        `■ 회사/브랜드명: ${company}\n` +
-        `■ 담당자명: ${name}\n` +
-        `■ 연락처: ${contact}\n\n` +
-        `■ 문의 내용:\n${message || '(내용 없음 - 시트 열람 요청)'}`
-      );
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "전송 중...";
 
-      const mailtoLink = `mailto:unyconnect.info@gmail.com?subject=${subject}&body=${body}`;
-      
-      // Step 2: 완료 화면으로 전환
-      document.getElementById('inquiry-form').classList.add('hidden');
-      document.getElementById('inquiry-success-step').classList.remove('hidden');
-      document.getElementById('modal-title').innerText = "접수 완료";
-      document.getElementById('modal-desc').innerText = "요청해 주셔서 감사합니다.";
-      
-      const sheetLinkBtn = document.getElementById('sheet-open-link');
-      sheetLinkBtn.href = PUBLIC_SHEET_VIEW_URL;
+      const payload = {
+        company: document.getElementById('user-company').value.trim(),
+        name: document.getElementById('user-name').value.trim(),
+        contact: document.getElementById('user-contact').value.trim(),
+        message: document.getElementById('user-message').value.trim()
+      };
 
-      document.getElementById('inquiry-form').reset();
-      lucide.createIcons();
+      try {
+        // 구글 스크립트로 데이터 전송 (방문자 PC 메일 앱 안 열림)
+        await fetch(APPS_SCRIPT_WEBAPP_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-      // 메일 프로그램 호출
-      window.location.href = mailtoLink;
+        // Step 2: 완료 화면으로 전환
+        document.getElementById('inquiry-form').classList.add('hidden');
+        document.getElementById('inquiry-success-step').classList.remove('hidden');
+        document.getElementById('modal-title').innerText = "접수 완료";
+        document.getElementById('modal-desc').innerText = "확인 후 신속히 회신드리겠습니다.";
+
+        const sheetLinkBtn = document.getElementById('sheet-open-link');
+        sheetLinkBtn.href = PUBLIC_SHEET_VIEW_URL;
+
+        document.getElementById('inquiry-form').reset();
+        lucide.createIcons();
+
+      } catch (err) {
+        alert("전송 중 일시적인 오류가 발생했습니다. 다시 시도해 주세요.");
+        console.error(err);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "제출 후 전체 리스트 보기";
+      }
     }
 
     function formatUrl(url) {
