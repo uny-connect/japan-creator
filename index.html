@@ -199,7 +199,6 @@
       setTimeout(() => {
         modal.classList.add('hidden');
         document.body.style.overflow = 'auto';
-        // 폼 초기화
         document.getElementById('inquiry-form').reset();
         document.getElementById('inquiry-form').classList.remove('hidden');
         document.getElementById('inquiry-success-step').classList.add('hidden');
@@ -314,22 +313,30 @@
             const dateEl = document.getElementById('update-date');
             if (dateEl && updateText) dateEl.innerText = updateText;
 
-            // 2행 헤더 탐색 및 매핑 (키워드 + 상대위치 Fallback 완비)
-            const headers = rows[1].map(h => (h || "").trim().toLowerCase().replace(/\s+/g, ''));
+            // 2행 헤더 파싱 및 인덱스 탐색
+            const rawHeaders = rows[1] || [];
+            const headers = rawHeaders.map(h => (h || "").toString().trim().toLowerCase().replace(/\s+/g, ''));
             const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k.toLowerCase())));
 
             const idxShootType = findIdx(['촬영형태', '촬영']);
-            const idxInstaLink = findIdx(['instagram링크', '인스타그램링크', '인스타링크', 'instagram', 'insta']);
+            const idxInstaLink = findIdx(['instagram링크', '인스타그램링크', '인스타링크', 'instagram']);
 
-            let idxInstaFollower = findIdx(['팔로워', 'follower']);
-            if (idxInstaFollower === -1 && idxInstaLink !== -1) idxInstaFollower = idxInstaLink + 1;
+            // 1. 완벽하게 작동 중인 '조회수 중앙값' 열 탐색
+            const idxInstaMedian = findIdx(['조회수중앙값', '중앙값', '조회수', 'median']);
 
-            let idxInstaMedian = findIdx(['조회수중앙값', '중앙값', '조회수', 'median']);
-            if (idxInstaMedian === -1 && idxInstaLink !== -1) idxInstaMedian = idxInstaLink + 3;
+            // 2. 인스타 팔로워 열 탐색 (키워드 매칭 우선, 미매칭 시 중앙값 앞 열 자동 보정)
+            let idxInstaFollower = findIdx(['인스타팔로워', 'instagram팔로워', '팔로워수', '팔로워', 'follower']);
+            if (idxInstaFollower === -1 && idxInstaMedian !== -1) {
+              idxInstaFollower = idxInstaMedian - 1;
+            }
 
-            let idxInstaER = findIdx(['er', '참여율', 'engagement']);
-            if (idxInstaER === -1 && idxInstaLink !== -1) idxInstaER = idxInstaLink + 4;
+            // 3. ER(참여율) 열 탐색 (키워드 매칭 우선, 미매칭 시 중앙값 뒷 열 자동 보정)
+            let idxInstaER = headers.findIndex(h => h.includes('er') || h.includes('참여율') || h.includes('%'));
+            if (idxInstaER === -1 && idxInstaMedian !== -1) {
+              idxInstaER = idxInstaMedian + 1;
+            }
 
+            // 틱톡 & 유튜브 인덱스
             const idxTiktokLink = findIdx(['tiktok링크', '틱톡링크', 'tiktok']);
             let idxTiktokFollower = findIdx(['tiktok팔로워', '틱톡팔로워']);
             if (idxTiktokFollower === -1 && idxTiktokLink !== -1) idxTiktokFollower = idxTiktokLink + 1;
@@ -337,6 +344,10 @@
             const idxYoutubeLink = findIdx(['youtube링크', '유튜브링크', 'youtube']);
             let idxYoutubeFollower = findIdx(['youtube구독자', '유튜브구독자', '구독자']);
             if (idxYoutubeFollower === -1 && idxYoutubeLink !== -1) idxYoutubeFollower = idxYoutubeLink + 1;
+
+            // 디버깅용 로그 (F12 콘솔에서 헤더 및 인덱스 확인 가능)
+            console.log("시트 헤더 원본:", rawHeaders);
+            console.log("매핑 결과 -> 팔로워 인덱스:", idxInstaFollower, "중앙값 인덱스:", idxInstaMedian, "ER 인덱스:", idxInstaER);
 
             // 크리에이터 데이터 조립
             const creators = [];
@@ -348,6 +359,13 @@
               const tiktokRaw = idxTiktokLink !== -1 ? r[idxTiktokLink] : "";
               const youtubeRaw = idxYoutubeLink !== -1 ? r[idxYoutubeLink] : "";
 
+              const followerVal = (idxInstaFollower !== -1 && r[idxInstaFollower] && r[idxInstaFollower].toString().trim() !== "") 
+                ? r[idxInstaFollower].toString().trim() : "-";
+              const medianVal = (idxInstaMedian !== -1 && r[idxInstaMedian] && r[idxInstaMedian].toString().trim() !== "") 
+                ? r[idxInstaMedian].toString().trim() : "-";
+              const erVal = (idxInstaER !== -1 && r[idxInstaER] && r[idxInstaER].toString().trim() !== "") 
+                ? r[idxInstaER].toString().trim() : "-";
+
               creators.push({
                 no: r[0] || "",
                 nameEn: r[1] || "",
@@ -357,9 +375,9 @@
                 shootType: (idxShootType !== -1 && r[idxShootType]) ? r[idxShootType] : "",
                 insta: {
                   link: formatUrl(instaRaw),
-                  followers: (idxInstaFollower !== -1 && r[idxInstaFollower]) ? r[idxInstaFollower].trim() : "-",
-                  medianViews: (idxInstaMedian !== -1 && r[idxInstaMedian]) ? r[idxInstaMedian].trim() : "-",
-                  er: (idxInstaER !== -1 && r[idxInstaER]) ? r[idxInstaER].trim() : "-"
+                  followers: followerVal,
+                  medianViews: medianVal,
+                  er: erVal
                 },
                 tiktok: {
                   link: formatUrl(tiktokRaw),
@@ -404,11 +422,10 @@
         if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.genre}</span>`);
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.shootType}</span>`);
 
-        // 멀티 채널 뱃지 생성 (링크가 있으면 클릭 가능하게 연결)
         const hasTiktok = Boolean(c.tiktok.link || (c.tiktok.followers && c.tiktok.followers !== '-'));
         const hasYoutube = Boolean(c.youtube.link || (c.youtube.followers && c.youtube.followers !== '-'));
 
-let multiChannelHtml = '';
+        let multiChannelHtml = '';
         if (hasTiktok || hasYoutube) {
           multiChannelHtml = `
             <div class="flex items-center justify-between pt-3 mt-3.5 border-t border-slate-100 text-xs text-slate-500">
