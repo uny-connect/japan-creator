@@ -164,7 +164,7 @@
 
   <script>
     // 1. 구글 시트 CSV 파싱용 URL
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pub?gid=588148010&single=true&output=csv";
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pub?gid=836201385&single=true&output=csv";
 
     // 2. 제출 완료 후 열어줄 공개용 구글 시트 URL
     const PUBLIC_SHEET_VIEW_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pubhtml?gid=588148010&single=true";
@@ -213,7 +213,7 @@
       if (e.key === 'Escape') closeContactModal();
     });
 
-    // 정밀 이메일 유효성 검사 (오타 도메인 필터링 포함)
+    // 정밀 이메일 유효성 검사
     function isValidEmail(email) {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(email)) return false;
@@ -313,66 +313,57 @@
             const dateEl = document.getElementById('update-date');
             if (dateEl && updateText) dateEl.innerText = updateText;
 
-            // 2행 헤더 파싱 및 인덱스 탐색
+            // 실제 시트 구조에 기반한 명시적 인덱스 매핑 (콘솔 확인 완료)
+            // 0: NO, 1: 크리에이터 이름, 2: 계정명, 3: 콘텐츠 장르, 4: 크리에이터 성별
+            // 5: 팔로워 성별, 6: 팔로워 연령, 7: 팔로워 국적, 8: 촬영 형태(단독/동행)
+            // 9: instagram 링크, 10: 팔로워(수치), 11: 중간 좋아요 수, 12: 조회수 중앙값, 13: ER(참여율)
+            const idxNo = 0;
+            const idxName = 1;
+            const idxAccount = 2;
+            const idxGenre = 3;
+            const idxGender = 4;
+            const idxShootType = 8;
+            const idxInstaLink = 9;
+            const idxInstaFollower = 10;
+            const idxInstaMedian = 12;
+            const idxInstaER = 13; // 공개용 시트에서 조회수 중앙값 뒤에 ER 열을 추가해 주시면 자동 반영됩니다.
+
+            // 틱톡 & 유튜브 인덱스 자동 탐색 (시트 뒤쪽에 추가될 경우 대비)
             const rawHeaders = rows[1] || [];
             const headers = rawHeaders.map(h => (h || "").toString().trim().toLowerCase().replace(/\s+/g, ''));
             const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k.toLowerCase())));
 
-            const idxShootType = findIdx(['촬영형태', '촬영']);
-            const idxInstaLink = findIdx(['instagram링크', '인스타그램링크', '인스타링크', 'instagram']);
-
-            // 1. 완벽하게 작동 중인 '조회수 중앙값' 열 탐색
-            const idxInstaMedian = findIdx(['조회수중앙값', '중앙값', '조회수', 'median']);
-
-            // 2. 인스타 팔로워 열 탐색 (키워드 매칭 우선, 미매칭 시 중앙값 앞 열 자동 보정)
-            let idxInstaFollower = findIdx(['인스타팔로워', 'instagram팔로워', '팔로워수', '팔로워', 'follower']);
-            if (idxInstaFollower === -1 && idxInstaMedian !== -1) {
-              idxInstaFollower = idxInstaMedian - 1;
-            }
-
-            // 3. ER(참여율) 열 탐색 (키워드 매칭 우선, 미매칭 시 중앙값 뒷 열 자동 보정)
-            let idxInstaER = headers.findIndex(h => h.includes('er') || h.includes('참여율') || h.includes('%'));
-            if (idxInstaER === -1 && idxInstaMedian !== -1) {
-              idxInstaER = idxInstaMedian + 1;
-            }
-
-            // 틱톡 & 유튜브 인덱스
             const idxTiktokLink = findIdx(['tiktok링크', '틱톡링크', 'tiktok']);
-            let idxTiktokFollower = findIdx(['tiktok팔로워', '틱톡팔로워']);
-            if (idxTiktokFollower === -1 && idxTiktokLink !== -1) idxTiktokFollower = idxTiktokLink + 1;
+            const idxTiktokFollower = idxTiktokLink !== -1 ? idxTiktokLink + 1 : -1;
 
             const idxYoutubeLink = findIdx(['youtube링크', '유튜브링크', 'youtube']);
-            let idxYoutubeFollower = findIdx(['youtube구독자', '유튜브구독자', '구독자']);
-            if (idxYoutubeFollower === -1 && idxYoutubeLink !== -1) idxYoutubeFollower = idxYoutubeLink + 1;
-
-            // 디버깅용 로그 (F12 콘솔에서 헤더 및 인덱스 확인 가능)
-            console.log("시트 헤더 원본:", rawHeaders);
-            console.log("매핑 결과 -> 팔로워 인덱스:", idxInstaFollower, "중앙값 인덱스:", idxInstaMedian, "ER 인덱스:", idxInstaER);
+            const idxYoutubeFollower = idxYoutubeLink !== -1 ? idxYoutubeLink + 1 : -1;
 
             // 크리에이터 데이터 조립
             const creators = [];
             for (let i = 2; i < rows.length; i++) {
               const r = rows[i];
-              if (!r[0] || isNaN(r[0])) continue;
+              if (!r[idxNo] || isNaN(r[idxNo])) continue;
 
-              const instaRaw = idxInstaLink !== -1 ? r[idxInstaLink] : "";
+              const instaRaw = r[idxInstaLink] || "";
               const tiktokRaw = idxTiktokLink !== -1 ? r[idxTiktokLink] : "";
               const youtubeRaw = idxYoutubeLink !== -1 ? r[idxYoutubeLink] : "";
 
-              const followerVal = (idxInstaFollower !== -1 && r[idxInstaFollower] && r[idxInstaFollower].toString().trim() !== "") 
+              // 값 정제 (빈 문자열이거나 없으면 '-')
+              const followerVal = (r[idxInstaFollower] && r[idxInstaFollower].toString().trim() !== "") 
                 ? r[idxInstaFollower].toString().trim() : "-";
-              const medianVal = (idxInstaMedian !== -1 && r[idxInstaMedian] && r[idxInstaMedian].toString().trim() !== "") 
+              const medianVal = (r[idxInstaMedian] && r[idxInstaMedian].toString().trim() !== "") 
                 ? r[idxInstaMedian].toString().trim() : "-";
-              const erVal = (idxInstaER !== -1 && r[idxInstaER] && r[idxInstaER].toString().trim() !== "") 
+              const erVal = (r[idxInstaER] && r[idxInstaER].toString().trim() !== "") 
                 ? r[idxInstaER].toString().trim() : "-";
 
               creators.push({
-                no: r[0] || "",
-                nameEn: r[1] || "",
-                accountName: r[2] || "",
-                genre: r[3] || "",
-                gender: r[4] || "",
-                shootType: (idxShootType !== -1 && r[idxShootType]) ? r[idxShootType] : "",
+                no: r[idxNo] || "",
+                nameEn: r[idxName] || "",
+                accountName: r[idxAccount] || "",
+                genre: r[idxGenre] || "",
+                gender: r[idxGender] || "",
+                shootType: r[idxShootType] || "",
                 insta: {
                   link: formatUrl(instaRaw),
                   followers: followerVal,
@@ -419,9 +410,10 @@
             : 'bg-blue-50 text-blue-600 border border-blue-100';
           tags.push(`<span class="${genderStyle} text-[11px] px-2 py-0.5 rounded font-semibold whitespace-nowrap">${c.gender}</span>`);
         }
-        if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.genre}</span>`);
+        if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded font-medium whitespace-nowrap">${c.genre}</span>`);
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.shootType}</span>`);
 
+        // 멀티 채널 뱃지 (단순 뱃지 표시)
         const hasTiktok = Boolean(c.tiktok.link || (c.tiktok.followers && c.tiktok.followers !== '-'));
         const hasYoutube = Boolean(c.youtube.link || (c.youtube.followers && c.youtube.followers !== '-'));
 
@@ -501,7 +493,6 @@
         grid.appendChild(card);
       });
 
-      // 카드 및 아이콘 렌더링 확정
       lucide.createIcons();
     }
 
