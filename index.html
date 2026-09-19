@@ -78,7 +78,7 @@
 
 <!-- Contact Modal (문의하기 & 시트 열람 팝업) -->
   <div id="contact-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200">
-    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all duration-200 scale-95 opacity-0" id="modal-container">
+    <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all duration-200 scale-95 opacity-0" id="modal-container">
       
       <!-- Modal Header -->
       <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
@@ -93,36 +93,38 @@
 
       <!-- Step 1: Modal Body (Form) -->
       <form id="inquiry-form" onsubmit="handleInquirySubmit(event)" class="p-6 space-y-4">
-        <!-- 회사명 -->
-        <div>
+        
+        <!-- 1. 회사명 -->
+        <div class="w-full">
           <label for="user-company" class="block text-xs font-bold text-slate-700 mb-1.5">회사명 / 브랜드명 <span class="text-rose-500">*</span></label>
           <input type="text" id="user-company" required placeholder="예: (주)유니커넥트 또는 브랜드명"
                  class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
         </div>
 
-        <!-- 담당자명 & 이메일 (한 줄에 2열) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- 2. 담당자명 & 이메일 (좌우 2열) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full">
           <div>
             <label for="user-name" class="block text-xs font-bold text-slate-700 mb-1.5">담당자명 / 직책 <span class="text-rose-500">*</span></label>
             <input type="text" id="user-name" required placeholder="홍길동 팀장"
                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
           </div>
 
-<div>
+          <div>
             <label for="user-contact" class="block text-xs font-bold text-slate-700 mb-1.5">회신받을 이메일 <span class="text-rose-500">*</span></label>
             <input type="email" id="user-contact" required placeholder="email@company.com"
                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
           </div>
-
-        <!-- 문의 내용 (가로 100% 독점) -->
-        <div>
-          <label for="user-message" class="block text-xs font-bold text-slate-700 mb-1.5">문의 내용 (선택)</label>
-          <textarea id="user-message" rows="3" placeholder="관심 있는 크리에이터 번호(#01 등)나 일정, 브랜드 카테고리를 남겨주시면 세부 견적 조율에 도움이 됩니다."
-                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all resize-none"></textarea>
         </div>
 
-        <!-- 하단 버튼 영역 (독립된 별도 줄) -->
-        <div class="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-50">
+        <!-- 3. 문의 내용 (가로 100% 독립 영역) -->
+        <div class="w-full">
+          <label for="user-message" class="block text-xs font-bold text-slate-700 mb-1.5">문의 내용 (선택)</label>
+          <textarea id="user-message" rows="3" placeholder="관심 있는 크리에이터 번호(#01 등)나 일정, 브랜드 카테고리를 남겨주시면 세부 견적 조율에 도움이 됩니다."
+                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all resize-none block"></textarea>
+        </div>
+
+        <!-- 4. 하단 버튼 영역 (독립된 행으로 분리) -->
+        <div class="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100 w-full">
           <button type="button" onclick="closeContactModal()"
                   class="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer">
             취소
@@ -132,6 +134,7 @@
             제출 후 전체 리스트 보기
           </button>
         </div>
+
       </form>
 
       <!-- Step 2: Modal Body (Success & Direct URL Link) -->
@@ -142,7 +145,7 @@
         <div class="space-y-1.5">
           <h4 class="text-lg font-bold text-slate-900">문의가 정상 접수되었습니다!</h4>
           <p class="text-xs text-slate-500 leading-relaxed">
-            입력하신 이메일로 접수 확인 메일이 자동 발송되었습니다.<br>
+            입력하신 이메일로 접수 확인 메일이 발송되었습니다.<br>
             아래 버튼을 눌러 라인업 정리 시트를 확인하세요.
           </p>
         </div>
@@ -240,26 +243,25 @@
     }
 
 // 폼 제출 처리
-    async function handleInquirySubmit(e) {
+async function handleInquirySubmit(e) {
       e.preventDefault();
 
       const emailInput = document.getElementById('user-contact');
       const emailValue = emailInput.value.trim();
 
-      // 기존 유효성 메시지 초기화
+      // 기존 검증 메시지 리셋
       emailInput.setCustomValidity("");
 
-      // 1. 브라우저 기본 검증 통과 여부 확인
+      // 1. 브라우저 기본 형식 검증 (말풍선 표시)
       if (!emailInput.checkValidity()) {
-        emailInput.reportValidity(); // 첫 번째 사진의 기본 말풍선 노출
+        emailInput.reportValidity();
         return;
       }
 
-      // 2. 정밀 검증 (.co 오타 등) 걸릴 경우 동일한 말풍선 툴팁으로 안내
+      // 2. 정밀 도메인 오타(.co 등) 검증 (동일한 브라우저 말풍선으로 표시)
       if (!isValidEmail(emailValue)) {
         emailInput.setCustomValidity("올바른 이메일 주소를 입력해 주세요. (예: name@company.com)");
-        emailInput.reportValidity(); // 말풍선 팝업 실행
-        // 사용자가 입력을 다시 시작하면 말풍선 메시지 자동 초기화
+        emailInput.reportValidity();
         emailInput.addEventListener('input', function onInput() {
           emailInput.setCustomValidity("");
           emailInput.removeEventListener('input', onInput);
