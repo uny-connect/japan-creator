@@ -403,15 +403,25 @@
         const card = document.createElement('div');
         card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden p-5";
 
-        const tags = [];
+const tags = [];
+
+        // 1. 성별 (남/여)
         if (c.gender) {
           const genderStyle = c.gender === '여' 
             ? 'bg-rose-50 text-rose-600 border border-rose-100' 
             : 'bg-blue-50 text-blue-600 border border-blue-100';
           tags.push(`<span class="${genderStyle} text-[11px] px-2 py-0.5 rounded font-semibold whitespace-nowrap">${c.gender}</span>`);
         }
-        if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded font-medium whitespace-nowrap">${c.genre}</span>`);
-        if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.shootType}</span>`);
+
+        // 2. 촬영 형태 (단독/동행)
+        if (c.shootType) {
+          tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.shootType}</span>`);
+        }
+
+        // 3. 장르 (직관성을 위해 '장르 | ' 라벨 부여)
+        if (c.genre) {
+          tags.push(`<span class="bg-slate-100 text-slate-700 border border-slate-200/60 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap"><span class="text-slate-400 font-normal">장르 |</span> ${c.genre}</span>`);
+        }
 
         // 멀티 채널 뱃지 (단순 뱃지 표시)
         const hasTiktok = Boolean(c.tiktok.link || (c.tiktok.followers && c.tiktok.followers !== '-'));
