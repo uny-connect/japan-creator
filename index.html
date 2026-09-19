@@ -325,22 +325,22 @@
         card.innerHTML = `
           <div>
             <!-- Header (Index Badge & Tags) -->
-            <div class="flex items-center justify-between gap-2 mb-4">
-              <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/60 text-[11px] font-bold text-slate-500 tracking-wider">
-                ${formattedNo}
-              </span>
-              <div class="flex flex-wrap gap-1.5 justify-end">
-                ${tags.join('')}
-              </div>
-            </div>
-            
-            <!-- Creator Profile Title & Name -->
-            <div class="mb-5 min-h-[54px] flex flex-col justify-end">
-              ${c.nameEn ? `<div class="text-sm font-extrabold text-slate-800 tracking-wider uppercase mb-0.5">${c.nameEn}</div>` : ''}
-              <h3 class="text-base font-semibold text-slate-900 leading-snug line-clamp-2 select-none">
-                ${c.accountName}
-              </h3>
-            </div>
+<div class="flex items-center justify-between gap-2 mb-2.5">
+  <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/60 text-[11px] font-bold text-slate-500 tracking-wider">
+    ${formattedNo}
+  </span>
+  <div class="flex flex-wrap gap-1.5 justify-end">
+    ${tags.join('')}
+  </div>
+</div>
+
+<!-- Creator Profile Title & Name -->
+<div class="mb-4">
+  ${c.nameEn ? `<div class="text-xs font-extrabold text-slate-800 tracking-wider uppercase leading-none mb-1">${c.nameEn}</div>` : ''}
+  <h3 class="text-base font-bold text-slate-900 leading-snug line-clamp-2 select-none">
+    ${c.accountName}
+  </h3>
+</div>
 
             <!-- Main Metric: Instagram -->
             <div class="rounded-xl border border-slate-200/90 bg-slate-50/60 p-4">
