@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>일본 인플루언서 공식 미디어킷</title>
+  <title>uny connect 일본 인플루언서 공식 미디어킷</title>
 
   <!-- Open Graph (카카오톡, 슬랙 링크 미리보기) -->
   <meta property="og:type" content="website">
@@ -45,8 +45,8 @@
         </div>
         <button type="button" onclick="openContactModal()"
            class="inline-flex items-center gap-1.5 px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold transition-colors shadow-sm cursor-pointer">
-          <i data-lucide="mail" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
-          <span>문의하기</span>
+          <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+          <span>문의 및 정리 시트 받기</span>
         </button>
       </div>
     </div>
@@ -76,22 +76,22 @@
     </div>
   </main>
 
-  <!-- Contact Modal (문의하기 팝업) -->
+  <!-- Contact Modal (문의하기 & 시트 열람 팝업) -->
   <div id="contact-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200">
     <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all duration-200 scale-95 opacity-0" id="modal-container">
       
       <!-- Modal Header -->
       <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-bold text-slate-900">프로젝트 문의 및 견적 요청</h3>
-          <p class="text-xs text-slate-500 mt-0.5">희망하시는 크리에이터 번호와 일정을 남겨주시면 빠르게 안내드립니다.</p>
+          <h3 class="text-lg font-bold text-slate-900" id="modal-title">프로젝트 문의 및 정리 시트 요청</h3>
+          <p class="text-xs text-slate-500 mt-0.5" id="modal-desc">간단한 정보를 남겨주시면 공개용 정리 시트가 바로 오픈됩니다.</p>
         </div>
         <button type="button" onclick="closeContactModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <!-- Modal Body (Form) -->
+      <!-- Step 1: Modal Body (Form) -->
       <form id="inquiry-form" onsubmit="handleInquirySubmit(event)" class="p-6 space-y-4">
         <div>
           <label for="user-name" class="block text-xs font-bold text-slate-700 mb-1.5">이름 / 담당자명 <span class="text-rose-500">*</span></label>
@@ -106,8 +106,8 @@
         </div>
 
         <div>
-          <label for="user-message" class="block text-xs font-bold text-slate-700 mb-1.5">문의 내용 <span class="text-rose-500">*</span></label>
-          <textarea id="user-message" rows="4" required placeholder="관심 있는 크리에이터 번호(#01, #03 등), 예상 촬영 일정, 브랜드 카테고리 등을 자유롭게 남겨주세요."
+          <label for="user-message" class="block text-xs font-bold text-slate-700 mb-1.5">문의 내용 (선택)</label>
+          <textarea id="user-message" rows="3" placeholder="관심 있는 크리에이터 번호(#01 등)나 일정, 브랜드 카테고리를 남겨주시면 세부 견적 조율에 도움이 됩니다."
                     class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all resize-none"></textarea>
         </div>
 
@@ -116,20 +116,60 @@
                   class="px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer">
             취소
           </button>
-          <button type="submit"
+          <button type="submit" id="submit-btn"
                   class="px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors shadow-sm cursor-pointer">
-            문의 보내기
+            제출하고 시트 보기
           </button>
         </div>
       </form>
+
+      <!-- Step 2: Modal Body (Success & Direct URL Link) -->
+      <div id="inquiry-success-step" class="hidden p-8 text-center space-y-5">
+        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+          <i data-lucide="check" class="w-6 h-6"></i>
+        </div>
+        <div class="space-y-1.5">
+          <h4 class="text-lg font-bold text-slate-900">문의가 정상 접수되었습니다!</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            담당자가 내용을 확인 후 남겨주신 연락처로 신속히 회신드리겠습니다.<br>
+            아래 버튼을 눌러 라인업 정리 시트를 확인하세요.
+          </p>
+        </div>
+
+        <div class="pt-2">
+          <!-- 공개용 시트 또는 엑셀 HTML 뷰어 URL -->
+          <a id="sheet-open-link" href="#" target="_blank" rel="noopener"
+             class="inline-flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold shadow-sm transition-all">
+            <span>크리에이터 공개용 시트 바로 열기</span>
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <div class="pt-1">
+          <button type="button" onclick="closeContactModal()" class="text-xs text-slate-400 hover:text-slate-600 underline">
+            창 닫기
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <script>
+    // 1. 구글 시트 CSV 파싱용 URL
     const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pub?gid=588148010&single=true&output=csv";
 
-    // 팝업 모달 열기/닫기
+    // 2. 제출 완료 후 열어줄 [공개용 구글 시트(또는 웹게시)] URL
+    const PUBLIC_SHEET_VIEW_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pubhtml?gid=588148010&single=true";
+
+    // 모달 제어
     function openContactModal() {
+      // 스텝 초기화 (폼 보이기, 완료창 숨기기)
+      document.getElementById('inquiry-form').classList.remove('hidden');
+      document.getElementById('inquiry-success-step').classList.add('hidden');
+      document.getElementById('modal-title').innerText = "프로젝트 문의 및 정리 시트 요청";
+      document.getElementById('modal-desc').innerText = "간단한 정보를 남겨주시면 공개용 정리 시트가 바로 오픈됩니다.";
+
       const modal = document.getElementById('contact-modal');
       const container = document.getElementById('modal-container');
       modal.classList.remove('hidden');
@@ -138,6 +178,7 @@
         container.classList.add('scale-100', 'opacity-100');
       });
       document.body.style.overflow = 'hidden';
+      lucide.createIcons();
     }
 
     function closeContactModal() {
@@ -159,27 +200,42 @@
       if (e.key === 'Escape') closeContactModal();
     });
 
-    // 메일 클라이언트 연동
+    // 폼 제출 시: 메일 클라이언트로 전송 트리거 후 모달을 완료 화면으로 변경
     function handleInquirySubmit(e) {
       e.preventDefault();
       const name = document.getElementById('user-name').value.trim();
       const contact = document.getElementById('user-contact').value.trim();
       const message = document.getElementById('user-message').value.trim();
 
-      const subject = encodeURIComponent(`[크리에이터 협업 문의] ${name}님의 문의`);
+      // 메일 링크 준비
+      const subject = encodeURIComponent(`[크리에이터 협업/시트요청] ${name}님의 문의`);
       const body = encodeURIComponent(
         `■ 담당자/기업명: ${name}\n` +
         `■ 연락처: ${contact}\n\n` +
-        `■ 문의 내용:\n${message}`
+        `■ 문의 내용:\n${message || '(내용 없음 - 시트 열람 요청)'}`
       );
 
-      window.location.href = `mailto:unyconnect.info@gmail.com?subject=${subject}&body=${body}`;
+      // 백그라운드에서 메일 열기 트리거
+      const mailtoLink = `mailto:unyconnect.info@gmail.com?subject=${subject}&body=${body}`;
       
-      closeContactModal();
+      // 모달 화면을 'Step 2: 완료 및 시트 오픈' 화면으로 전환
+      document.getElementById('inquiry-form').classList.add('hidden');
+      document.getElementById('inquiry-success-step').classList.remove('hidden');
+      document.getElementById('modal-title').innerText = "접수 완료";
+      document.getElementById('modal-desc').innerText = "요청해 주셔서 감사합니다.";
+      
+      // 시트 링크 주소 지정
+      const sheetLinkBtn = document.getElementById('sheet-open-link');
+      sheetLinkBtn.href = PUBLIC_SHEET_VIEW_URL;
+
+      // 폼 리셋
       document.getElementById('inquiry-form').reset();
+      lucide.createIcons();
+
+      // 메일 창 열기 (필요 시)
+      window.location.href = mailtoLink;
     }
 
-    // URL 유효성 보정 함수
     function formatUrl(url) {
       if (!url) return "";
       const trimmed = url.trim();
@@ -200,7 +256,6 @@
             const rows = results.data;
             if (rows.length < 3) return;
 
-            // 1행 업데이트 날짜 추출
             let updateText = "";
             if (rows[0]) {
               const rawDateStr = rows[0][1] || rows[0].join(" ");
@@ -213,7 +268,6 @@
             const dateEl = document.getElementById('update-date');
             if (dateEl && updateText) dateEl.innerText = updateText;
 
-            // 2행 헤더 인덱스 매핑
             const headers = rows[1].map(h => (h || "").trim().toLowerCase().replace(/\s+/g, ''));
             const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k.toLowerCase())));
 
@@ -284,7 +338,6 @@
         const card = document.createElement('div');
         card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden p-6";
 
-        // 성별/장르/촬영형태 태그
         const tags = [];
         if (c.gender) {
           const genderStyle = c.gender === '여' 
@@ -295,7 +348,6 @@
         if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded font-medium">${c.genre}</span>`);
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.shootType}</span>`);
 
-        // 멀티 채널 뱃지
         const hasTiktok = Boolean(c.tiktok.link || (c.tiktok.followers && c.tiktok.followers !== '-'));
         const hasYoutube = Boolean(c.youtube.link || (c.youtube.followers && c.youtube.followers !== '-'));
 
@@ -316,7 +368,6 @@
 
         card.innerHTML = `
           <div>
-            <!-- Header (Index Badge & Tags) -->
             <div class="flex items-center justify-between gap-2 mb-2.5">
               <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/60 text-[11px] font-bold text-slate-500 tracking-wider">
                 ${formattedNo}
@@ -326,7 +377,6 @@
               </div>
             </div>
 
-            <!-- Creator Profile Title & Name (밀착 간격) -->
             <div class="mb-4">
               ${c.nameEn ? `<div class="text-xs font-extrabold text-slate-800 tracking-wider uppercase leading-none mb-1">${c.nameEn}</div>` : ''}
               <h3 class="text-base font-bold text-slate-900 leading-snug line-clamp-2 select-none">
@@ -334,7 +384,6 @@
               </h3>
             </div>
 
-            <!-- Main Metric: Instagram -->
             <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
               <div class="flex items-center justify-between mb-3.5">
                 <span class="text-xs font-bold text-slate-900 tracking-tight">Instagram</span>
@@ -345,7 +394,6 @@
                 ` : ''}
               </div>
 
-              <!-- Metrics 3-Columns -->
               <div class="grid grid-cols-3 gap-2 text-center">
                 <div class="bg-white rounded-lg py-2.5 px-1 border border-slate-200 shadow-sm">
                   <div class="text-[10px] text-slate-400 font-medium mb-0.5">팔로워</div>
@@ -362,7 +410,6 @@
               </div>
             </div>
 
-            <!-- 멀티 채널 태그 표시 -->
             ${multiChannelHtml}
           </div>
         `;
