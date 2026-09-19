@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>uny connect 일본 인플루언서 공식 미디어킷</title>
+  <title>UNY CONNECT 일본 인플루언서 공식 미디어킷</title>
 
   <!-- Open Graph (카카오톡, 슬랙 링크 미리보기) -->
   <meta property="og:type" content="website">
@@ -76,7 +76,7 @@
     </div>
   </main>
 
-<!-- Contact Modal (문의하기 & 시트 열람 팝업) -->
+  <!-- Contact Modal (문의하기 & 시트 열람 팝업) -->
   <div id="contact-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200">
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all duration-200 scale-95 opacity-0" id="modal-container">
       
@@ -107,7 +107,6 @@
           </div>
 
           <div>
-            <!-- 이메일 주소만 입력 가능하도록 변경 -->
             <label for="user-contact" class="block text-xs font-bold text-slate-700 mb-1">회신받을 이메일 <span class="text-rose-500">*</span></label>
             <input type="email" id="user-contact" required placeholder="email@company.com"
                    class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all">
@@ -132,7 +131,7 @@
         </div>
       </form>
 
-      <!-- Step 2: Modal Body (Success & Direct URL Link - 콤팩트 디자인) -->
+      <!-- Step 2: Modal Body (Success & Direct URL Link) -->
       <div id="inquiry-success-step" class="hidden p-6 text-center space-y-4">
         <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
           <i data-lucide="check" class="w-5 h-5"></i>
@@ -146,7 +145,6 @@
         </div>
 
         <div class="pt-1">
-          <!-- 공개용 시트 바로가기 버튼 -->
           <a id="sheet-open-link" href="#" target="_blank" rel="noopener"
              class="inline-flex items-center justify-center gap-1.5 w-full px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold shadow-sm transition-all">
             <span>크리에이터 공개용 시트 바로 열기</span>
@@ -166,14 +164,16 @@
 
   <script>
     // 1. 구글 시트 CSV 파싱용 URL
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pub?gid=836201385&single=true&output=csv";
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pub?gid=588148010&single=true&output=csv";
 
-    // 2. 제출 완료 후 열어줄 [공개용 구글 시트(또는 웹게시)] URL
+    // 2. 제출 완료 후 열어줄 공개용 구글 시트 URL
     const PUBLIC_SHEET_VIEW_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pubhtml?gid=588148010&single=true";
+
+    // 3. 구글 Apps Script 웹 앱 URL (배포 후 나온 URL을 여기에 붙여넣어 주세요)
+    const APPS_SCRIPT_WEBAPP_URL = "여기에_Apps_Script_웹앱_URL을_넣어주세요";
 
     // 모달 제어
     function openContactModal() {
-      // 스텝 초기화 (폼 보이기, 완료창 숨기기)
       document.getElementById('inquiry-form').classList.remove('hidden');
       document.getElementById('inquiry-success-step').classList.add('hidden');
       document.getElementById('modal-title').innerText = "프로젝트 문의 및 정리 시트 요청";
@@ -209,23 +209,34 @@
       if (e.key === 'Escape') closeContactModal();
     });
 
-// 1. 위 1단계에서 복사한 구글 Apps Script 웹 앱 URL을 따옴표 안에 넣어주세요
-    const APPS_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxrix85xvzlTyr1fP6ntG9zBwS7Zx67-YfjEqOXoa00ZV52PAOyNkFYAt1UA23YF39N/exec";
+    // 정밀 이메일 유효성 검사 함수
+    function isValidEmail(email) {
+      // 1. 기본 구조 검증 (영문/숫자@도메인.최상위도메인 2자 이상)
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(email)) return false;
 
-// 폼 제출 시 백그라운드 전송 처리
+      // 2. 흔한 오타 도메인 필터링 (@gmail.co, @naver.co 등 m 탈락 방지)
+      const typoDomains = ['gmail.co', 'naver.co', 'daum.co', 'kakao.co', 'icloud.co', 'yahoo.co', 'nate.co'];
+      const domainPart = email.split('@')[1].toLowerCase();
+      if (typoDomains.includes(domainPart)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    // 폼 제출 처리
     async function handleInquirySubmit(e) {
       e.preventDefault();
 
       const emailInput = document.getElementById('user-contact');
       const emailValue = emailInput.value.trim();
 
-      // [추가] 정확한 이메일 형식 검증 (도메인 확장자가 2자 이상인지 체크: .com, .net, .co.kr 등)
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      
-      if (!emailRegex.test(emailValue)) {
-        alert("올바른 이메일 주소를 입력해 주세요. (예: name@company.com)");
+      // 이메일 정밀 유효성 검사
+      if (!isValidEmail(emailValue)) {
+        alert("이메일 주소를 다시 확인해 주세요. (예: name@company.com)");
         emailInput.focus();
-        return; // 전송 중단
+        return;
       }
 
       const submitBtn = document.getElementById('submit-btn');
@@ -240,12 +251,14 @@
       };
 
       try {
-        await fetch(APPS_SCRIPT_WEBAPP_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+        if (APPS_SCRIPT_WEBAPP_URL && !APPS_SCRIPT_WEBAPP_URL.includes("여기에")) {
+          await fetch(APPS_SCRIPT_WEBAPP_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+        }
 
         // Step 2: 완료 화면으로 전환
         document.getElementById('inquiry-form').classList.add('hidden');
@@ -305,9 +318,9 @@
 
             const idxShootType = findIdx(['촬영형태']);
             const idxInstaLink = findIdx(['instagram링크', '인스타그램링크', 'instagram']);
-            const idxInstaFollower = idxInstaLink !== -1 ? idxInstaLink + 1 : -1;
-            const idxInstaMedian = idxInstaLink !== -1 ? idxInstaLink + 3 : -1;
-            const idxInstaER = idxInstaLink !== -1 ? idxInstaLink + 4 : -1;
+            const idxInstaFollower = findIdx(['팔로워', 'follower']);
+            const idxInstaMedian = findIdx(['조회수중앙값', '중앙값', 'median']);
+            const idxInstaER = findIdx(['er', '참여율']);
 
             const idxTiktokLink = findIdx(['tiktok링크', '틱톡링크', 'tiktok']);
             const idxTiktokFollower = idxTiktokLink !== -1 ? idxTiktokLink + 1 : -1;
@@ -368,17 +381,17 @@
 
       data.forEach(c => {
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden p-6";
+        card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden p-5";
 
         const tags = [];
         if (c.gender) {
           const genderStyle = c.gender === '여' 
             ? 'bg-rose-50 text-rose-600 border border-rose-100' 
             : 'bg-blue-50 text-blue-600 border border-blue-100';
-          tags.push(`<span class="${genderStyle} text-[11px] px-2 py-0.5 rounded font-semibold">${c.gender}</span>`);
+          tags.push(`<span class="${genderStyle} text-[11px] px-2 py-0.5 rounded font-semibold whitespace-nowrap">${c.gender}</span>`);
         }
-        if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2.5 py-0.5 rounded font-medium">${c.genre}</span>`);
-        if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium">${c.shootType}</span>`);
+        if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.genre}</span>`);
+        if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.shootType}</span>`);
 
         const hasTiktok = Boolean(c.tiktok.link || (c.tiktok.followers && c.tiktok.followers !== '-'));
         const hasYoutube = Boolean(c.youtube.link || (c.youtube.followers && c.youtube.followers !== '-'));
@@ -386,7 +399,7 @@
         let multiChannelHtml = '';
         if (hasTiktok || hasYoutube) {
           multiChannelHtml = `
-            <div class="flex items-center justify-between pt-3 mt-4 border-t border-slate-100 text-xs text-slate-500">
+            <div class="flex items-center justify-between pt-3 mt-3.5 border-t border-slate-100 text-xs text-slate-500">
               <span class="font-medium text-slate-400">멀티 채널 보유</span>
               <div class="flex items-center gap-1.5">
                 ${hasTiktok ? '<span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 text-[11px] font-semibold border border-slate-200">TikTok</span>' : ''}
@@ -397,51 +410,61 @@
         }
 
         const formattedNo = `#${String(c.no).padStart(2, '0')}`;
+        const displayName = c.nameEn || c.accountName;
 
         card.innerHTML = `
           <div>
-            <div class="flex items-center justify-between gap-2 mb-2.5">
-              <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200/60 text-[11px] font-bold text-slate-500 tracking-wider">
-                ${formattedNo}
-              </span>
-              <div class="flex flex-wrap gap-1.5 justify-end">
+            <!-- [통합 헤더 라인]: #01 번호 + 이름 + 태그들을 한 줄에 나란히 배치 -->
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-md bg-slate-100 border border-slate-200/70 text-[11px] font-bold text-slate-500 tracking-wider shrink-0">
+                  ${formattedNo}
+                </span>
+                <h3 class="text-base font-extrabold text-slate-900 tracking-tight truncate">
+                  ${displayName}
+                </h3>
+              </div>
+              <div class="flex items-center gap-1 shrink-0">
                 ${tags.join('')}
               </div>
             </div>
 
-            <div class="mb-4">
-              ${c.nameEn ? `<div class="text-xs font-extrabold text-slate-800 tracking-wider uppercase leading-none mb-1">${c.nameEn}</div>` : ''}
-              <h3 class="text-base font-bold text-slate-900 leading-snug line-clamp-2 select-none">
-                ${c.accountName}
-              </h3>
-            </div>
-
-            <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <div class="flex items-center justify-between mb-3.5">
-                <span class="text-xs font-bold text-slate-900 tracking-tight">Instagram</span>
+            <!-- Instagram Channel Box (채널명 클릭 시 바로 인스타 연결) -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 transition-colors hover:border-slate-300">
+              <div class="mb-2.5">
                 ${c.insta.link ? `
-                  <a href="${c.insta.link}" target="_blank" rel="noopener" class="text-xs font-medium text-slate-500 hover:text-slate-900 flex items-center transition-colors">
-                    SNS 바로가기 <i data-lucide="external-link" class="w-3 h-3 ml-1"></i>
+                  <a href="${c.insta.link}" target="_blank" rel="noopener" 
+                     class="group inline-flex items-center justify-between w-full text-slate-800 hover:text-indigo-600 transition-colors">
+                    <span class="text-xs sm:text-sm font-bold truncate group-hover:underline underline-offset-4 tracking-tight">
+                      ${c.accountName}
+                    </span>
+                    <i data-lucide="external-link" class="w-3.5 h-3.5 ml-1.5 text-slate-400 group-hover:text-indigo-600 shrink-0 transition-colors"></i>
                   </a>
-                ` : ''}
+                ` : `
+                  <span class="text-xs sm:text-sm font-bold text-slate-800 truncate tracking-tight block">
+                    ${c.accountName}
+                  </span>
+                `}
               </div>
 
-              <div class="grid grid-cols-3 gap-2 text-center">
-                <div class="bg-white rounded-lg py-2.5 px-1 border border-slate-200 shadow-sm">
+              <!-- Metrics 3-Columns (지표) -->
+              <div class="grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
+                <div class="bg-white rounded-lg py-2 px-1 border border-slate-200 shadow-sm">
                   <div class="text-[10px] text-slate-400 font-medium mb-0.5">팔로워</div>
-                  <div class="text-sm sm:text-base font-bold text-slate-800 tracking-tight">${c.insta.followers}</div>
+                  <div class="text-xs sm:text-sm font-bold text-slate-800 tracking-tight">${c.insta.followers}</div>
                 </div>
-                <div class="bg-white rounded-lg py-2.5 px-1 border-2 border-slate-900 shadow-sm">
+                <div class="bg-white rounded-lg py-2 px-1 border-2 border-slate-900 shadow-sm">
                   <div class="text-[10px] text-slate-900 font-bold mb-0.5">조회수 중앙값</div>
-                  <div class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">${c.insta.medianViews}</div>
+                  <div class="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight">${c.insta.medianViews}</div>
                 </div>
-                <div class="bg-white rounded-lg py-2.5 px-1 border border-slate-200 shadow-sm">
+                <div class="bg-white rounded-lg py-2 px-1 border border-slate-200 shadow-sm">
                   <div class="text-[10px] text-slate-400 font-medium mb-0.5">ER(참여율)</div>
-                  <div class="text-sm sm:text-base font-bold text-slate-800 tracking-tight">${c.insta.er}</div>
+                  <div class="text-xs sm:text-sm font-bold text-slate-800 tracking-tight">${c.insta.er}</div>
                 </div>
               </div>
             </div>
 
+            <!-- 멀티 채널 태그 -->
             ${multiChannelHtml}
           </div>
         `;
