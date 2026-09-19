@@ -169,10 +169,10 @@
     // 2. 제출 완료 후 열어줄 공개용 구글 시트 URL
     const PUBLIC_SHEET_VIEW_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCBS5qVBjgYyvbZ7mTpeqLAMmSFcsSOeSIxt74BsZxRe-AiRcE-tzdUkLBsHbYjPXPkxA5h4Q5qp6G/pubhtml?gid=588148010&single=true";
 
-    // 3. 구글 Apps Script 웹 앱 URL (배포 후 나온 URL을 여기에 붙여넣어 주세요)
+    // 3. 구글 Apps Script 웹 앱 URL
     const APPS_SCRIPT_WEBAPP_URL = "여기에_Apps_Script_웹앱_URL을_넣어주세요";
 
-    // 모달 제어
+    // 모달 상태 초기화 및 열기
     function openContactModal() {
       document.getElementById('inquiry-form').classList.remove('hidden');
       document.getElementById('inquiry-success-step').classList.add('hidden');
@@ -190,6 +190,7 @@
       lucide.createIcons();
     }
 
+    // 모달 닫기
     function closeContactModal() {
       const modal = document.getElementById('contact-modal');
       const container = document.getElementById('modal-container');
@@ -198,6 +199,10 @@
       setTimeout(() => {
         modal.classList.add('hidden');
         document.body.style.overflow = 'auto';
+        // 폼 초기화
+        document.getElementById('inquiry-form').reset();
+        document.getElementById('inquiry-form').classList.remove('hidden');
+        document.getElementById('inquiry-success-step').classList.add('hidden');
       }, 200);
     }
 
@@ -209,18 +214,14 @@
       if (e.key === 'Escape') closeContactModal();
     });
 
-    // 정밀 이메일 유효성 검사 함수
+    // 정밀 이메일 유효성 검사 (오타 도메인 필터링 포함)
     function isValidEmail(email) {
-      // 1. 기본 구조 검증 (영문/숫자@도메인.최상위도메인 2자 이상)
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(email)) return false;
 
-      // 2. 흔한 오타 도메인 필터링 (@gmail.co, @naver.co 등 m 탈락 방지)
       const typoDomains = ['gmail.co', 'naver.co', 'daum.co', 'kakao.co', 'icloud.co', 'yahoo.co', 'nate.co'];
       const domainPart = email.split('@')[1].toLowerCase();
-      if (typoDomains.includes(domainPart)) {
-        return false;
-      }
+      if (typoDomains.includes(domainPart)) return false;
 
       return true;
     }
@@ -232,7 +233,6 @@
       const emailInput = document.getElementById('user-contact');
       const emailValue = emailInput.value.trim();
 
-      // 이메일 정밀 유효성 검사
       if (!isValidEmail(emailValue)) {
         alert("이메일 주소를 다시 확인해 주세요. (예: name@company.com)");
         emailInput.focus();
@@ -301,6 +301,7 @@
             const rows = results.data;
             if (rows.length < 3) return;
 
+            // 1행 업데이트 날짜 추출
             let updateText = "";
             if (rows[0]) {
               const rawDateStr = rows[0][1] || rows[0].join(" ");
@@ -313,21 +314,31 @@
             const dateEl = document.getElementById('update-date');
             if (dateEl && updateText) dateEl.innerText = updateText;
 
+            // 2행 헤더 탐색 및 매핑 (키워드 + 상대위치 Fallback 완비)
             const headers = rows[1].map(h => (h || "").trim().toLowerCase().replace(/\s+/g, ''));
             const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k.toLowerCase())));
 
-            const idxShootType = findIdx(['촬영형태']);
-            const idxInstaLink = findIdx(['instagram링크', '인스타그램링크', 'instagram']);
-            const idxInstaFollower = findIdx(['팔로워', 'follower']);
-            const idxInstaMedian = findIdx(['조회수중앙값', '중앙값', 'median']);
-            const idxInstaER = findIdx(['er', '참여율']);
+            const idxShootType = findIdx(['촬영형태', '촬영']);
+            const idxInstaLink = findIdx(['instagram링크', '인스타그램링크', '인스타링크', 'instagram', 'insta']);
+
+            let idxInstaFollower = findIdx(['팔로워', 'follower']);
+            if (idxInstaFollower === -1 && idxInstaLink !== -1) idxInstaFollower = idxInstaLink + 1;
+
+            let idxInstaMedian = findIdx(['조회수중앙값', '중앙값', '조회수', 'median']);
+            if (idxInstaMedian === -1 && idxInstaLink !== -1) idxInstaMedian = idxInstaLink + 3;
+
+            let idxInstaER = findIdx(['er', '참여율', 'engagement']);
+            if (idxInstaER === -1 && idxInstaLink !== -1) idxInstaER = idxInstaLink + 4;
 
             const idxTiktokLink = findIdx(['tiktok링크', '틱톡링크', 'tiktok']);
-            const idxTiktokFollower = idxTiktokLink !== -1 ? idxTiktokLink + 1 : -1;
+            let idxTiktokFollower = findIdx(['tiktok팔로워', '틱톡팔로워']);
+            if (idxTiktokFollower === -1 && idxTiktokLink !== -1) idxTiktokFollower = idxTiktokLink + 1;
 
             const idxYoutubeLink = findIdx(['youtube링크', '유튜브링크', 'youtube']);
-            const idxYoutubeFollower = idxYoutubeLink !== -1 ? idxYoutubeLink + 1 : -1;
+            let idxYoutubeFollower = findIdx(['youtube구독자', '유튜브구독자', '구독자']);
+            if (idxYoutubeFollower === -1 && idxYoutubeLink !== -1) idxYoutubeFollower = idxYoutubeLink + 1;
 
+            // 크리에이터 데이터 조립
             const creators = [];
             for (let i = 2; i < rows.length; i++) {
               const r = rows[i];
@@ -393,10 +404,11 @@
         if (c.genre) tags.push(`<span class="bg-slate-100 text-slate-700 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.genre}</span>`);
         if (c.shootType) tags.push(`<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] px-2 py-0.5 rounded font-medium whitespace-nowrap">${c.shootType}</span>`);
 
+        // 멀티 채널 뱃지 생성 (링크가 있으면 클릭 가능하게 연결)
         const hasTiktok = Boolean(c.tiktok.link || (c.tiktok.followers && c.tiktok.followers !== '-'));
         const hasYoutube = Boolean(c.youtube.link || (c.youtube.followers && c.youtube.followers !== '-'));
 
-        let multiChannelHtml = '';
+let multiChannelHtml = '';
         if (hasTiktok || hasYoutube) {
           multiChannelHtml = `
             <div class="flex items-center justify-between pt-3 mt-3.5 border-t border-slate-100 text-xs text-slate-500">
@@ -414,7 +426,7 @@
 
         card.innerHTML = `
           <div>
-            <!-- [통합 헤더 라인]: #01 번호 + 이름 + 태그들을 한 줄에 나란히 배치 -->
+            <!-- [통합 헤더 라인]: #01 번호 + 이름 + 태그 한 줄 배치 -->
             <div class="flex items-center justify-between gap-2 mb-3">
               <div class="flex items-center gap-2 min-w-0">
                 <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-md bg-slate-100 border border-slate-200/70 text-[11px] font-bold text-slate-500 tracking-wider shrink-0">
@@ -431,7 +443,7 @@
 
             <!-- Instagram Channel Box (채널명 클릭 시 바로 인스타 연결) -->
             <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5 transition-colors hover:border-slate-300">
-              <div class="mb-2.5">
+              <div class="mb-2.5 min-w-0">
                 ${c.insta.link ? `
                   <a href="${c.insta.link}" target="_blank" rel="noopener" 
                      class="group inline-flex items-center justify-between w-full text-slate-800 hover:text-indigo-600 transition-colors">
@@ -472,11 +484,12 @@
         grid.appendChild(card);
       });
 
+      // 카드 및 아이콘 렌더링 확정
       lucide.createIcons();
     }
 
+    // 초기 실행
     loadSheetData();
-    lucide.createIcons();
   </script>
 </body>
 </html>
