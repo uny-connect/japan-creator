@@ -76,7 +76,7 @@
     </div>
   </main>
 
-<!-- Contact Modal (문의하기 & 시트 열람 팝업) -->
+  <!-- Contact Modal (문의하기 & 시트 열람 팝업) -->
   <div id="contact-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200">
     <div class="bg-white w-full max-w-xl rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all duration-200 scale-95 opacity-0" id="modal-container">
       
@@ -231,19 +231,8 @@
       return true;
     }
 
-// 에러 상태 초기화
-    function clearEmailError() {
-      const emailInput = document.getElementById('user-contact');
-      const errorMsg = document.getElementById('email-error-msg');
-      if (errorMsg) errorMsg.classList.add('hidden');
-      if (emailInput) {
-        emailInput.classList.remove('border-rose-500', 'bg-rose-50/30', 'focus:ring-rose-500');
-        emailInput.classList.add('border-slate-200', 'bg-slate-50', 'focus:ring-slate-900');
-      }
-    }
-
-// 폼 제출 처리
-async function handleInquirySubmit(e) {
+    // 폼 제출 처리 (브라우저 기본 말풍선 툴팁 방식)
+    async function handleInquirySubmit(e) {
       e.preventDefault();
 
       const emailInput = document.getElementById('user-contact');
@@ -344,41 +333,40 @@ async function handleInquirySubmit(e) {
             const dateEl = document.getElementById('update-date');
             if (dateEl && updateText) dateEl.innerText = updateText;
 
-            // 실제 시트 구조에 기반한 명시적 인덱스 매핑 (콘솔 확인 완료)
-            // 0: NO, 1: 크리에이터 이름, 2: 계정명, 3: 콘텐츠 장르, 4: 크리에이터 성별
-            // 5: 팔로워 성별, 6: 팔로워 연령, 7: 팔로워 국적, 8: 촬영 형태(단독/동행)
-            // 9: instagram 링크, 10: 팔로워(수치), 11: 중간 좋아요 수, 12: 조회수 중앙값, 13: ER(참여율)
+            // [새 시트 구조 반영 인덱스]
+            // 0: NO.
+            // 1: 크리에이터 본명 (웹 비노출)
+            // 2: 닉네임 (상단 메인 표시)
+            // 3: 계정명 (인스타 박스 내 채널명)
+            // 4: 콘텐츠 장르
+            // 5: 크리에이터 성별
+            // 6: 팔로워 성별, 7: 팔로워 연령, 8: 팔로워 국적
+            // 9: 촬영 형태
+            // 10: instagram 링크
+            // 11: 팔로워(인스타)
+            // 12: 중간 좋아요 수
+            // 13: 조회수 중앙값(인스타)
+            // 14: ER (인스타)
+            // 15: TikTok 링크
+            // 20: YouTube 링크
             const idxNo = 0;
-            const idxName = 1;
-            const idxAccount = 2;
-            const idxGenre = 3;
-            const idxGender = 4;
-            const idxShootType = 8;
-            const idxInstaLink = 9;
-            const idxInstaFollower = 10;
-            const idxInstaMedian = 12;
-            const idxInstaER = 13; // 공개용 시트에서 조회수 중앙값 뒤에 ER 열을 추가해 주시면 자동 반영됩니다.
-
-            // 틱톡 & 유튜브 인덱스 자동 탐색 (시트 뒤쪽에 추가될 경우 대비)
-            const rawHeaders = rows[1] || [];
-            const headers = rawHeaders.map(h => (h || "").toString().trim().toLowerCase().replace(/\s+/g, ''));
-            const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k.toLowerCase())));
-
-            const idxTiktokLink = findIdx(['tiktok링크', '틱톡링크', 'tiktok']);
-            const idxTiktokFollower = idxTiktokLink !== -1 ? idxTiktokLink + 1 : -1;
-
-            const idxYoutubeLink = findIdx(['youtube링크', '유튜브링크', 'youtube']);
-            const idxYoutubeFollower = idxYoutubeLink !== -1 ? idxYoutubeLink + 1 : -1;
+            const idxNickname = 2;
+            const idxAccount = 3;
+            const idxGenre = 4;
+            const idxGender = 5;
+            const idxShootType = 9;
+            const idxInstaLink = 10;
+            const idxInstaFollower = 11;
+            const idxInstaMedian = 13;
+            const idxInstaER = 14;
+            const idxTiktokLink = 15;
+            const idxYoutubeLink = 20;
 
             // 크리에이터 데이터 조립
             const creators = [];
             for (let i = 2; i < rows.length; i++) {
               const r = rows[i];
               if (!r[idxNo] || isNaN(r[idxNo])) continue;
-
-              const instaRaw = r[idxInstaLink] || "";
-              const tiktokRaw = idxTiktokLink !== -1 ? r[idxTiktokLink] : "";
-              const youtubeRaw = idxYoutubeLink !== -1 ? r[idxYoutubeLink] : "";
 
               // 값 정제 (빈 문자열이거나 없으면 '-')
               const followerVal = (r[idxInstaFollower] && r[idxInstaFollower].toString().trim() !== "") 
@@ -388,27 +376,30 @@ async function handleInquirySubmit(e) {
               const erVal = (r[idxInstaER] && r[idxInstaER].toString().trim() !== "") 
                 ? r[idxInstaER].toString().trim() : "-";
 
+              // 틱톡 / 유튜브 보유 여부 체크용 (링크가 있거나 '-'가 아닌 유효값이 있는 경우)
+              const tiktokVal = (r[idxTiktokLink] && r[idxTiktokLink].toString().trim() !== "-" && r[idxTiktokLink].toString().trim() !== "") ? r[idxTiktokLink].toString().trim() : "";
+              const youtubeVal = (r[idxYoutubeLink] && r[idxYoutubeLink].toString().trim() !== "-" && r[idxYoutubeLink].toString().trim() !== "") ? r[idxYoutubeLink].toString().trim() : "";
+
+              // 상단 표시명: 닉네임 우선, 없을 시 계정명
+              const nicknameVal = (r[idxNickname] && r[idxNickname].toString().trim() !== "") 
+                ? r[idxNickname].toString().trim() 
+                : (r[idxAccount] || "");
+
               creators.push({
                 no: r[idxNo] || "",
-                nameEn: r[idxName] || "",
+                displayName: nicknameVal,
                 accountName: r[idxAccount] || "",
                 genre: r[idxGenre] || "",
                 gender: r[idxGender] || "",
                 shootType: r[idxShootType] || "",
                 insta: {
-                  link: formatUrl(instaRaw),
+                  link: formatUrl(r[idxInstaLink] || ""),
                   followers: followerVal,
                   medianViews: medianVal,
                   er: erVal
                 },
-                tiktok: {
-                  link: formatUrl(tiktokRaw),
-                  followers: (idxTiktokFollower !== -1 && r[idxTiktokFollower]) ? r[idxTiktokFollower].trim() : ""
-                },
-                youtube: {
-                  link: formatUrl(youtubeRaw),
-                  followers: (idxYoutubeFollower !== -1 && r[idxYoutubeFollower]) ? r[idxYoutubeFollower].trim() : ""
-                }
+                hasTiktok: Boolean(tiktokVal),
+                hasYoutube: Boolean(youtubeVal)
               });
             }
 
@@ -434,7 +425,7 @@ async function handleInquirySubmit(e) {
         const card = document.createElement('div');
         card.className = "bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden p-5";
 
-const tags = [];
+        const tags = [];
 
         // 1. 성별 (남/여)
         if (c.gender) {
@@ -455,8 +446,8 @@ const tags = [];
         }
 
         // 멀티 채널 뱃지 (단순 뱃지 표시)
-        const hasTiktok = Boolean(c.tiktok.link || (c.tiktok.followers && c.tiktok.followers !== '-'));
-        const hasYoutube = Boolean(c.youtube.link || (c.youtube.followers && c.youtube.followers !== '-'));
+        const hasTiktok = c.hasTiktok;
+        const hasYoutube = c.hasYoutube;
 
         let multiChannelHtml = '';
         if (hasTiktok || hasYoutube) {
@@ -472,11 +463,11 @@ const tags = [];
         }
 
         const formattedNo = `#${String(c.no).padStart(2, '0')}`;
-        const displayName = c.nameEn || c.accountName;
+        const displayName = c.displayName;
 
         card.innerHTML = `
           <div>
-            <!-- [통합 헤더 라인]: #01 번호 + 이름 + 태그 한 줄 배치 -->
+            <!-- [통합 헤더 라인]: #01 번호 + 닉네임 + 태그 한 줄 배치 -->
             <div class="flex items-center justify-between gap-2 mb-3">
               <div class="flex items-center gap-2 min-w-0">
                 <span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-md bg-slate-100 border border-slate-200/70 text-[11px] font-bold text-slate-500 tracking-wider shrink-0">
