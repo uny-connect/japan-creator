@@ -333,19 +333,19 @@
             const dateEl = document.getElementById('update-date');
             if (dateEl && updateText) dateEl.innerText = updateText;
 
-// [최종 웹 오픈용 19개 컬럼 기준 인덱스]
-            const idxNo = 0;             // NO.
-            const idxNickname = 1;       // 닉네임 (상단 메인 표시)
-            const idxAccount = 2;        // 계정명 (인스타 채널명)
-            const idxGenre = 3;          // 콘텐츠 장르
-            const idxGender = 4;         // 크리에이터 성별
-            const idxShootType = 5;      // 촬영 형태
-            const idxInstaLink = 6;      // instagram 링크
-            const idxInstaFollower = 7;  // 팔로워
-            const idxInstaMedian = 9;    // 조회수 중앙값
-            const idxInstaER = 10;       // ER (좋아요+댓글+즐겨찾기)/조회수
-            const idxTiktokLink = 11;    // TikTok 링크
-            const idxYoutubeLink = 16;   // YouTube 링크
+// [구글 시트 열 알파벳 기준 100% 실측 인덱스]
+            const idxNo = 0;             // A열: NO.
+            const idxNickname = 1;       // B열: 닉네임
+            const idxAccount = 2;        // C열: 계정명
+            const idxGenre = 3;          // D열: 콘텐츠 장르
+            const idxGender = 4;         // E열: 크리에이터 성별 (남/여)
+            const idxShootType = 5;      // F열: 촬영 형태 (동행(2인)/단독)
+            const idxInstaLink = 6;      // G열: instagram 링크
+            const idxInstaFollower = 7;  // H열: 팔로워 (69,000)
+            const idxInstaMedian = 9;    // J열: 조회수 중앙값 (56,000)
+            const idxInstaER = 10;       // K열: ER (1.0%)
+            const idxTiktokLink = 11;    // L열: TikTok 링크
+            const idxYoutubeLink = 16;   // Q열: YouTube 링크
 
             // 크리에이터 데이터 조립
             const creators = [];
@@ -361,7 +361,7 @@
               const erVal = (r[idxInstaER] && r[idxInstaER].toString().trim() !== "") 
                 ? r[idxInstaER].toString().trim() : "-";
 
-              // 틱톡 / 유튜브 보유 여부 체크
+              // 틱톡 / 유튜브 보유 여부 체크 (링크가 있거나 '-'가 아닌 경우)
               const tiktokVal = (r[idxTiktokLink] && r[idxTiktokLink].toString().trim() !== "-" && r[idxTiktokLink].toString().trim() !== "") 
                 ? r[idxTiktokLink].toString().trim() : "";
               const youtubeVal = (r[idxYoutubeLink] && r[idxYoutubeLink].toString().trim() !== "-" && r[idxYoutubeLink].toString().trim() !== "") 
