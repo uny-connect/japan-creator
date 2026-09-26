@@ -333,19 +333,19 @@ async function loadSheetData() {
             const dateEl = document.getElementById('update-date');
             if (dateEl && updateText) dateEl.innerText = updateText;
 
-            // [구글 시트 열 알파벳 기준 100% 실측 인덱스]
-            const idxNo = 0;             // A열: NO.
-            const idxNickname = 1;       // B열: 닉네임
-            const idxAccount = 2;        // C열: 계정명
-            const idxGenre = 3;          // D열: 콘텐츠 장르
-            const idxGender = 4;         // E열: 크리에이터 성별 (남/여)
-            const idxShootType = 5;      // F열: 촬영 형태 (동행(2인)/단독)
-            const idxInstaLink = 6;      // G열: instagram 링크
-            const idxInstaFollower = 7;  // H열: 팔로워 (69,000)
-            const idxInstaMedian = 9;    // J열: 조회수 중앙값 (56,000)
-            const idxInstaER = 10;       // K열: ER (1.0%)
-            const idxTiktokLink = 11;    // L열: TikTok 링크
-            const idxYoutubeLink = 16;   // Q열: YouTube 링크
+// [현재 12개 열 시트 기준 정확한 인덱스]
+            const idxNo = 0;             // 1번(A열): NO.
+            const idxNickname = 1;       // 3번(C열): 닉네임
+            const idxAccount = 2;        // 4번(D열): 계정명
+            const idxGenre = 3;          // 5번(E열): 콘텐츠 장르
+            const idxGender = 4;         // 6번(F열): 크리에이터 성별
+            const idxShootType = 5;      // 10번(J열): 촬영 형태
+            const idxInstaLink = 6;      // 11번(K열): instagram 링크
+            const idxInstaFollower = 7;  // 12번(L열): 팔로워
+            const idxInstaMedian = 8;    // 14번(N열): 조회수 중앙값
+            const idxInstaER = 9;        // 15번(O열): ER
+            const idxTiktokLink = 10;    // 16번(P열): TikTok 링크
+            const idxYoutubeLink = 11;   // 21번(U열): YouTube 링크
 
             // 크리에이터 데이터 조립
             const creators = [];
