@@ -308,7 +308,7 @@
       return `https://${trimmed}`;
     }
 
-    async function loadSheetData() {
+async function loadSheetData() {
       try {
         const response = await fetch(GOOGLE_SHEET_CSV_URL);
         const csvText = await response.text();
@@ -333,7 +333,7 @@
             const dateEl = document.getElementById('update-date');
             if (dateEl && updateText) dateEl.innerText = updateText;
 
-// [구글 시트 열 알파벳 기준 100% 실측 인덱스]
+            // [구글 시트 열 알파벳 기준 100% 실측 인덱스]
             const idxNo = 0;             // A열: NO.
             const idxNickname = 1;       // B열: 닉네임
             const idxAccount = 2;        // C열: 계정명
@@ -388,7 +388,13 @@
                 hasTiktok: Boolean(tiktokVal),
                 hasYoutube: Boolean(youtubeVal)
               });
-            } catch (err) {
+            } // for문 종료
+
+            // 정상 조립 후 카드 렌더링 호출
+            renderCards(creators);
+          } // complete 콜백 종료
+        }); // Papa.parse 종료
+      } catch (err) {
         document.getElementById('loading').innerHTML = `
           <div class="text-rose-500 font-medium text-sm">데이터를 불러오는 중 오류가 발생했습니다.</div>
         `;
