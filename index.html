@@ -333,34 +333,33 @@
             const dateEl = document.getElementById('update-date');
             if (dateEl && updateText) dateEl.innerText = updateText;
 
-            // [새 시트 구조 반영 인덱스]
+            // [공개용 시트 기준 정확한 인덱스 매핑 (0부터 시작)]
             // 0: NO.
-            // 1: 크리에이터 본명 (웹 비노출)
-            // 2: 닉네임 (상단 메인 표시)
-            // 3: 계정명 (인스타 박스 내 채널명)
-            // 4: 콘텐츠 장르
-            // 5: 크리에이터 성별
-            // 6: 팔로워 성별, 7: 팔로워 연령, 8: 팔로워 국적
-            // 9: 촬영 형태
-            // 10: instagram 링크
-            // 11: 팔로워(인스타)
-            // 12: 중간 좋아요 수
-            // 13: 조회수 중앙값(인스타)
-            // 14: ER (인스타)
-            // 15: TikTok 링크
-            // 20: YouTube 링크
+            // 1: 닉네임 (상단 메인 표시)
+            // 2: 계정명 (인스타 박스 내 채널명)
+            // 3: 콘텐츠 장르
+            // 4: 크리에이터 성별
+            // 5: 팔로워 성별, 6: 팔로워 연령, 7: 팔로워 국적
+            // 8: 촬영 형태
+            // 9: instagram 링크
+            // 10: 인스타 팔로워
+            // 11: 중간 좋아요 수
+            // 12: 조회수 중앙값
+            // 13: ER (참여율)
+            // 14: TikTok 링크
+            // 19: YouTube 링크
             const idxNo = 0;
-            const idxNickname = 2;
-            const idxAccount = 3;
-            const idxGenre = 4;
-            const idxGender = 5;
-            const idxShootType = 9;
-            const idxInstaLink = 10;
-            const idxInstaFollower = 11;
-            const idxInstaMedian = 13;
-            const idxInstaER = 14;
-            const idxTiktokLink = 15;
-            const idxYoutubeLink = 20;
+            const idxNickname = 1;
+            const idxAccount = 2;
+            const idxGenre = 3;
+            const idxGender = 4;
+            const idxShootType = 8;
+            const idxInstaLink = 9;
+            const idxInstaFollower = 10;
+            const idxInstaMedian = 12;
+            const idxInstaER = 13;
+            const idxTiktokLink = 14;
+            const idxYoutubeLink = 19;
 
             // 크리에이터 데이터 조립
             const creators = [];
@@ -376,9 +375,11 @@
               const erVal = (r[idxInstaER] && r[idxInstaER].toString().trim() !== "") 
                 ? r[idxInstaER].toString().trim() : "-";
 
-              // 틱톡 / 유튜브 보유 여부 체크용 (링크가 있거나 '-'가 아닌 유효값이 있는 경우)
-              const tiktokVal = (r[idxTiktokLink] && r[idxTiktokLink].toString().trim() !== "-" && r[idxTiktokLink].toString().trim() !== "") ? r[idxTiktokLink].toString().trim() : "";
-              const youtubeVal = (r[idxYoutubeLink] && r[idxYoutubeLink].toString().trim() !== "-" && r[idxYoutubeLink].toString().trim() !== "") ? r[idxYoutubeLink].toString().trim() : "";
+              // 틱톡 / 유튜브 보유 여부 체크
+              const tiktokVal = (r[idxTiktokLink] && r[idxTiktokLink].toString().trim() !== "-" && r[idxTiktokLink].toString().trim() !== "") 
+                ? r[idxTiktokLink].toString().trim() : "";
+              const youtubeVal = (r[idxYoutubeLink] && r[idxYoutubeLink].toString().trim() !== "-" && r[idxYoutubeLink].toString().trim() !== "") 
+                ? r[idxYoutubeLink].toString().trim() : "";
 
               // 상단 표시명: 닉네임 우선, 없을 시 계정명
               const nicknameVal = (r[idxNickname] && r[idxNickname].toString().trim() !== "") 
